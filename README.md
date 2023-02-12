@@ -1,2 +1,7 @@
 # funu
-Computaion Geometry
+about:
+Computaional Geometry
+Combinatorial Optimization
+
+require:
+C++17
