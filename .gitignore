@@ -929,7 +929,7 @@ ServiceFabricBackup/
 *.ndf
 
 # Business Intelligence projects
-*.rdl.data
+*.rdl.data_
 *.bim.layout
 *.bim_*.settings
 *.rptproj.rsuser
