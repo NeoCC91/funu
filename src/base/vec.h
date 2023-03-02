@@ -13,6 +13,20 @@
 
 namespace funu
 {
+	template<typename scalarType, int row, int col>
+	class Matrix
+	{
+	public:
+		Matrix() : arrs_{}
+		{
+		}
+		~Matrix() = default;
+		
+	
+	public:
+		std::array<std::array<scalarType, row>, col> arrs_;
+	};
+	
 	template<typename scalarType, int dimension>
 	class Vec
 	{
