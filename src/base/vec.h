@@ -13,20 +13,6 @@
 
 namespace funu
 {
-	template<typename scalarType, int row, int col>
-	class Matrix
-	{
-	public:
-		Matrix() : arrs_{}
-		{
-		}
-		~Matrix() = default;
-		
-	
-	public:
-		std::array<std::array<scalarType, row>, col> arrs_;
-	};
-	
 	template<typename scalarType, int dimension>
 	class Vec
 	{
@@ -41,8 +27,9 @@ namespace funu
 		
 		void set_zero()
 		{
-			operator=(operator*(static_cast<scalarType>(0)));
+			//operator=(operator*(static_cast<scalarType>(0)));
 			//std::memset(arr_,static_cast<scalarType>(0),dimension);
+			std::fill(arr_.begin(), arr_.end(), static_cast<scalarType>(0));
 		}
 		
 		[[nodiscard]] bool is_zero() const
@@ -69,17 +56,18 @@ namespace funu
 		
 		void normalized()
 		{
-			auto const copy{ normalize() };
+			//auto const copy{ normalize() };
 			//std::copy(copy.arr_.begin(), copy.arr_.end(), arr_.begin());
-			operator=(copy);
+			operator=(normalize());
 		}
+		
 		Vec normalize() const
 		{
 			if (is_zero())
 			{
 				throw std::exception("zero vector!");
 			}
-			auto const factor{ 1 / norm() };
+			auto const factor{ static_cast<scalarType>(1) / norm() };
 			return operator*(factor);
 		}
 		
@@ -88,7 +76,7 @@ namespace funu
 			Vec res{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				res[i] = arr_[i] - rhs.arr_[i];
+				res[i] = arr_[i] - rhs[i];
 			}
 			return res;
 		}
@@ -106,7 +94,7 @@ namespace funu
 			Vec res{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				res[i] = arr_[i] + rhs.arr_[i];
+				res[i] = arr_[i] + rhs[i];
 			}
 			return res;
 		}
@@ -116,7 +104,7 @@ namespace funu
 			scalarType sum{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				sum += arr_[i] * rhs.arr_[i];
+				sum += arr_[i] * rhs[i];
 			}
 			return sum;
 		}
@@ -124,16 +112,24 @@ namespace funu
 		Vec operator*(scalarType factor) const
 		{
 			auto copy{ *this };
-			std::transform(copy.arr_.begin(), copy.arr_.end(), [factor](auto const val)
+			for (int i = 0; i < dimension; ++i)
 			{
-				return val * factor;
-			});
+				copy[i] *= factor;
+			}
 			return copy;
 		}
 		
-		~Vec() = default;
+		scalarType const& operator[](int index) const
+		{
+			return arr_[index];
+		}
+		
+		scalarType& operator[](int index)
+		{
+			return arr_[index];
+		}
 	
-	public:
+	private:
 		std::array<scalarType, dimension> arr_;
 	};
 	
@@ -178,6 +174,73 @@ namespace funu
 		auto const& [x2, y2]{ rhs };
 		return x1 * y2 - x2 * y1;
 	}
+	
+	//squared matrix order n
+	//列序为主序
+	template<typename scalarType, int dimension>
+	class SqMat
+	{
+	public:
+		SqMat() : arrs_{}
+		{
+		}
+		~SqMat() = default;
+		
+		void set_zero()
+		{
+			for (auto& arr : arrs_)
+			{
+				arr.set_zero();
+			}
+		}
+		
+		scalarType determinant();
+		
+		Vec<scalarType, dimension> operator*(Vec<scalarType, dimension> const& rhs) const
+		{
+			Vec<scalarType, dimension> res;
+			for (int i = 0; i < dimension; ++i)
+			{
+				res += arrs_[i] * rhs[i];
+			}
+			return res;
+		}
+		
+		SqMat operator*(SqMat const& rhs) const
+		{
+			SqMat res;
+			for (int i = 0; i < dimension; ++i)
+			{
+				res[i] = operator*(rhs[i]);
+			}
+			return res;
+		}
+		
+		Vec<scalarType, dimension> const& operator[](int index) const
+		{
+			return arrs_[index];
+		}
+		
+		Vec<scalarType, dimension>& operator[](int index)
+		{
+			return arrs_[index];
+		}
+	
+	private:
+		std::array<Vec<scalarType, dimension>, dimension> arrs_;
+	};
+	
+	
+	template<typename scalarType, int dimension>
+	scalarType SqMat<scalarType, dimension>::determinant()
+	{
+		return nullptr;
+	}
+	
+	using Matrix33f=SqMat<float,3>;
+	using Matrix33d=SqMat<double,3>;
+	using Matrix44f=SqMat<float,4>;
+	using Matrix44d=SqMat<double,4>;
 	
 }
 #endif //FUNU_VEC_H
