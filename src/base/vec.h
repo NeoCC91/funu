@@ -9,7 +9,6 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
-#include <exception>
 
 namespace funu
 {
@@ -63,10 +62,12 @@ namespace funu
 		
 		Vec normalize() const
 		{
+			/*
 			if (is_zero())
 			{
 				throw std::exception("zero vector!");
 			}
+			 */
 			auto const factor{ static_cast<scalarType>(1) / norm() };
 			return operator*(factor);
 		}
@@ -81,6 +82,7 @@ namespace funu
 			return res;
 		}
 		
+		//negative operator
 		void operator-(int)
 		{
 			for (int i = 0; i < dimension; ++i)
@@ -104,19 +106,19 @@ namespace funu
 			scalarType sum{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				sum += arr_[i] * rhs[i];
+				sum = sum + arr_[i] * rhs[i];
 			}
 			return sum;
 		}
 		
 		Vec operator*(scalarType factor) const
 		{
-			auto copy{ *this };
+			Vec res{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				copy[i] *= factor;
+				res[i] = arr_[i] * factor;
 			}
-			return copy;
+			return res;
 		}
 		
 		scalarType const& operator[](int index) const
@@ -176,7 +178,7 @@ namespace funu
 	}
 	
 	//squared matrix order n
-	//列序为主序
+	//列序为主序 sqMat[i][j]指的是第i列，第j行
 	template<typename scalarType, int dimension>
 	class SqMat
 	{
@@ -194,21 +196,21 @@ namespace funu
 			}
 		}
 		
-		scalarType determinant();
+		//scalarType determinant();
 		
 		Vec<scalarType, dimension> operator*(Vec<scalarType, dimension> const& rhs) const
 		{
-			Vec<scalarType, dimension> res;
+			Vec<scalarType, dimension> res{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				res += arrs_[i] * rhs[i];
+				res = res + arrs_[i] * rhs[i];
 			}
 			return res;
 		}
 		
 		SqMat operator*(SqMat const& rhs) const
 		{
-			SqMat res;
+			SqMat res{};
 			for (int i = 0; i < dimension; ++i)
 			{
 				res[i] = operator*(rhs[i]);
@@ -230,17 +232,18 @@ namespace funu
 		std::array<Vec<scalarType, dimension>, dimension> arrs_;
 	};
 	
-	
+	/*
 	template<typename scalarType, int dimension>
 	scalarType SqMat<scalarType, dimension>::determinant()
 	{
-		return nullptr;
+		return {};
 	}
+	*/
 	
-	using Matrix33f=SqMat<float,3>;
-	using Matrix33d=SqMat<double,3>;
-	using Matrix44f=SqMat<float,4>;
-	using Matrix44d=SqMat<double,4>;
+	using Matrix33f = SqMat<float, 3>;
+	using Matrix33d = SqMat<double, 3>;
+	using Matrix44f = SqMat<float, 4>;
+	using Matrix44d = SqMat<double, 4>;
 	
 }
 #endif //FUNU_VEC_H
