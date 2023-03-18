@@ -3,4 +3,4 @@ project(funu)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(funu main.cpp src/base/vec.h)
+add_executable(funu main.cpp src/base/vec.h src/base/halfedge.h)
