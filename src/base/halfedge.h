@@ -65,8 +65,9 @@ public:
 	bool addVertices(VertexContainer const& vertices);
 	
 	//面片处理
-	bool addFace(Face f);
-	bool addFaces(FaceContainer const& f);
+	bool addFace(Vertex v0, Vertex v1, Vertex v2);
+	//bool addFace(Face f);
+	//bool addFaces(FaceContainer const& f);
 
 private:
 	VertexContainer vertices_;

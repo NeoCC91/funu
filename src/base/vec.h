@@ -177,11 +177,12 @@ namespace funu
 		return x1 * y2 - x2 * y1;
 	}
 	
-	//squared matrix order n
+	//squared matrix order n n<=4
 	//列序为主序 sqMat[i][j]指的是第i列，第j行
 	template<typename scalarType, int dimension>
 	class SqMat
 	{
+		static_assert(dimension <= 4);
 	public:
 		SqMat() : arrs_{}
 		{
@@ -196,7 +197,9 @@ namespace funu
 			}
 		}
 		
-		//scalarType determinant();
+		scalarType determinant() const;
+		SqMat transpose() const;
+		SqMat reverse() const;
 		
 		Vec<scalarType, dimension> operator*(Vec<scalarType, dimension> const& rhs) const
 		{
@@ -232,13 +235,75 @@ namespace funu
 		std::array<Vec<scalarType, dimension>, dimension> arrs_;
 	};
 	
-	/*
 	template<typename scalarType, int dimension>
-	scalarType SqMat<scalarType, dimension>::determinant()
+	scalarType SqMat<scalarType, dimension>::determinant() const
 	{
-		return {};
+		auto order = arrs_.size();
+		if (order == 2)
+		{
+			return arrs_[1][1] * arrs_[0][0] - arrs_[0][1] * arrs_[1][0];
+		}
+		else if (order == 3)
+		{
+			return (arrs_[0][0] * arrs_[1][1] * arrs_[2][2] + arrs_[1][0] * arrs_[2][1] * arrs_[0][2]
+				+ arrs_[2][0] * arrs_[0][1] * arrs_[1][2]) -
+				(arrs_[0][0] * arrs_[2][1] * arrs_[1][2] + arrs_[1][0] * arrs_[0][1] * arrs_[2][2]
+					+ arrs_[2][0] * arrs_[1][1] * arrs_[0][2]);
+		}
+		else if (order == 4)
+		{
+			return
+				arrs_[0][0] * (
+					arrs_[1][1] * arrs_[2][2] * arrs_[3][3] + arrs_[2][1] * arrs_[3][2] * arrs_[1][3]
+						+ arrs_[3][1] * arrs_[1][2] * arrs_[2][3] -
+						arrs_[1][1] * arrs_[3][2] * arrs_[2][3] - arrs_[2][1] * arrs_[1][2] * arrs_[3][3]
+						- arrs_[3][1] * arrs_[2][2] * arrs_[1][3]
+				)
+					- arrs_[1][0] * (
+						arrs_[0][1] * arrs_[2][2] * arrs_[3][3] + arrs_[2][1] * arrs_[3][2] * arrs_[0][3]
+							+ arrs_[3][1] * arrs_[0][2] * arrs_[2][3] -
+							arrs_[0][1] * arrs_[3][2] * arrs_[2][3] - arrs_[2][1] * arrs_[0][2] * arrs_[3][3]
+							- arrs_[3][1] * arrs_[2][2] * arrs_[0][3]
+					)
+					+ arrs_[2][0] * (
+						arrs_[0][1] * arrs_[1][2] * arrs_[3][3] + arrs_[1][1] * arrs_[3][2] * arrs_[0][3]
+							+ arrs_[3][1] * arrs_[0][2] * arrs_[1][3] -
+							arrs_[0][1] * arrs_[3][2] * arrs_[1][3] - arrs_[1][1] * arrs_[0][2] * arrs_[3][3]
+							- arrs_[3][1] * arrs_[1][2] * arrs_[0][3]
+					)
+					- arrs_[3][0] * (
+						arrs_[0][1] * arrs_[1][2] * arrs_[2][3] + arrs_[1][1] * arrs_[2][2] * arrs_[0][3]
+							+ arrs_[2][1] * arrs_[0][2] * arrs_[1][3] -
+							arrs_[0][1] * arrs_[2][2] * arrs_[1][3] - arrs_[1][1] * arrs_[0][2] * arrs_[2][3]
+							- arrs_[2][1] * arrs_[1][2] * arrs_[0][3]
+					);
+		}
+		else
+		{
+			return {};
+		}
 	}
-	*/
+	
+	template<typename scalarType, int dimension>
+	SqMat<scalarType, dimension> SqMat<scalarType, dimension>::transpose() const
+	{
+		SqMat transposedSqM(*this);
+		auto order = arrs_.size();
+		for (int i = 1; i < order; ++i)
+		{
+			for (int j = 0; j < i; ++j)
+			{
+				std::swap(transposedSqM[i][j], transposedSqM[j][i]);
+			}
+		}
+		return transposedSqM;
+	}
+	
+	template<typename scalarType, int dimension>
+	SqMat<scalarType, dimension> SqMat<scalarType, dimension>::reverse() const
+	{
+		return SqMat();
+	}
 	
 	using Matrix33f = SqMat<float, 3>;
 	using Matrix33d = SqMat<double, 3>;
