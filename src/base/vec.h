@@ -311,22 +311,22 @@ namespace funu
 						- arrs_[3][1] * arrs_[2][2] * arrs_[1][3]
 				)
 					- arrs_[0][1] * (
-					arrs_[1][0] * arrs_[2][2] * arrs_[3][3] + arrs_[2][0] * arrs_[3][2] * arrs_[1][3]
-						+ arrs_[3][0] * arrs_[1][2] * arrs_[2][3] -
-						arrs_[1][0] * arrs_[3][2] * arrs_[2][3] - arrs_[2][0] * arrs_[1][2] * arrs_[3][3]
-						- arrs_[3][0] * arrs_[2][2] * arrs_[1][3]
+						arrs_[1][0] * arrs_[2][2] * arrs_[3][3] + arrs_[2][0] * arrs_[3][2] * arrs_[1][3]
+							+ arrs_[3][0] * arrs_[1][2] * arrs_[2][3] -
+							arrs_[1][0] * arrs_[3][2] * arrs_[2][3] - arrs_[2][0] * arrs_[1][2] * arrs_[3][3]
+							- arrs_[3][0] * arrs_[2][2] * arrs_[1][3]
 					)
 					+ arrs_[0][2] * (
-					arrs_[1][0] * arrs_[2][1] * arrs_[3][3] + arrs_[2][0] * arrs_[3][1] * arrs_[1][3]
-						+ arrs_[3][0] * arrs_[1][1] * arrs_[2][3] -
-						arrs_[1][0] * arrs_[3][1] * arrs_[2][3] - arrs_[2][0] * arrs_[1][1] * arrs_[3][3]
-						- arrs_[3][0] * arrs_[2][1] * arrs_[1][3]
+						arrs_[1][0] * arrs_[2][1] * arrs_[3][3] + arrs_[2][0] * arrs_[3][1] * arrs_[1][3]
+							+ arrs_[3][0] * arrs_[1][1] * arrs_[2][3] -
+							arrs_[1][0] * arrs_[3][1] * arrs_[2][3] - arrs_[2][0] * arrs_[1][1] * arrs_[3][3]
+							- arrs_[3][0] * arrs_[2][1] * arrs_[1][3]
 					)
 					- arrs_[0][3] * (
-					arrs_[1][0] * arrs_[2][1] * arrs_[3][2] + arrs_[2][0] * arrs_[3][1] * arrs_[1][2]
-						+ arrs_[3][0] * arrs_[1][1] * arrs_[2][2] -
-						arrs_[1][0] * arrs_[3][1] * arrs_[2][2] - arrs_[2][0] * arrs_[1][1] * arrs_[3][2]
-						- arrs_[3][0] * arrs_[2][1] * arrs_[1][2]
+						arrs_[1][0] * arrs_[2][1] * arrs_[3][2] + arrs_[2][0] * arrs_[3][1] * arrs_[1][2]
+							+ arrs_[3][0] * arrs_[1][1] * arrs_[2][2] -
+							arrs_[1][0] * arrs_[3][1] * arrs_[2][2] - arrs_[2][0] * arrs_[1][1] * arrs_[3][2]
+							- arrs_[3][0] * arrs_[2][1] * arrs_[1][2]
 					);
 		}
 		else if (dimension >= 5)
@@ -341,21 +341,22 @@ namespace funu
 			for (int k = 0; k < dimension; ++k)
 			{
 				//构造minorMat
-				for (int i = 1; i < dimension; ++i,++minorMatColIndex)
+				for (int i = 1; i < dimension; ++i, ++minorMatColIndex)
 				{
 					for (int j = 0; j < dimension; ++j)
 					{
-						if (j!=k){
-							minorMat[minorMatColIndex][minorMatRowIndex]=arrs_[i][j];
+						if (j != k)
+						{
+							minorMat[minorMatColIndex][minorMatRowIndex] = arrs_[i][j];
 							++minorMatRowIndex;
 						}
 					}
-					minorMatRowIndex=0;
+					minorMatRowIndex = 0;
 				}
 				factor ^= 1;
 				sum = sum + ((factor << 1) - 1) * arrs_[0][k] * minorMat.determinant();
 				minorMatColIndex = 0;
-				minorMatRowIndex=0;
+				minorMatRowIndex = 0;
 			}
 			return sum;
 		}
@@ -369,24 +370,25 @@ namespace funu
 		if (dimension == 1)
 		{
 			res[0][0] = static_cast<scalarType>(1) / arrs_[0][0];
-		}else if(dimension==2)
+		}
+		else if (dimension == 2)
 		{
-			res[0][0]=determinateInverse*arrs_[1][1];
-			res[0][1]=-determinateInverse*arrs_[0][1];
-			res[1][0]=-determinateInverse*arrs_[1][0];
-			res[1][1]=determinateInverse*arrs_[0][0];
+			res[0][0] = determinateInverse * arrs_[1][1];
+			res[0][1] = -determinateInverse * arrs_[0][1];
+			res[1][0] = -determinateInverse * arrs_[1][0];
+			res[1][1] = determinateInverse * arrs_[0][0];
 		}
 		else if (dimension >= 3)
 		{
 			//伴随矩阵adjMat
-			auto& adjMat{res};
-			SqMat<scalarType, dimension-1> minorMat{};
+			auto& adjMat{ res };
+			SqMat<scalarType, dimension - 1> minorMat{};
 			//第i列，第j行，相对于伴随矩阵
 			for (int i = 0; i < dimension; ++i)
 			{
 				for (int j = 0; j < dimension; ++j)
 				{
-					auto& value{adjMat[i][j]};
+					auto& value{ adjMat[i][j] };
 					//minorMat的列和行
 					int colIndex{};
 					int rowIndex{};
@@ -394,7 +396,8 @@ namespace funu
 					//m表示列，n表示行，相对于原矩阵
 					for (int m = 0; m < dimension; ++m)
 					{
-						if (m==j){
+						if (m == j)
+						{
 							continue;
 						}
 						for (int n = 0; n < dimension; ++n)
