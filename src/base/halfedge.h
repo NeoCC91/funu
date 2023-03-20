@@ -6,7 +6,6 @@
 #define FUNU_SRC_BASE_HALFEDGE_H_
 
 #include <vector>
-
 #include "vec.h"
 
 namespace funu
