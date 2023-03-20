@@ -123,7 +123,7 @@ namespace funu
 	
 	private:
 		
-		//计算子矩阵，会不会导致重载失败？
+		//提取子矩阵，会不会导致重载失败？
 		template<int subRowSize, int subColSize>
 		Mat<scalarType, subRowSize, subColSize> extractSubMat(int rowStart,
 			int colStart,
