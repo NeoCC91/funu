@@ -12,69 +12,33 @@
 
 namespace funu
 {
-	//四则运算对象不可变
+	//列向量
+	//代数运算对象不可变
 	template<typename scalarType, int dimension>
 	class Vec final
 	{
 	public:
 		explicit Vec(scalarType args...) : arr_{ std::forward<scalarType>(args) }
 		{
-		
 		}
+		
+		//构造0向量
 		Vec() : arr_{}
 		{
 		}
 		
-		void set_zero()
+		//access
+		scalarType const& operator[](int index) const
 		{
-			//operator=(operator*(static_cast<scalarType>(0)));
-			//std::memset(arr_,static_cast<scalarType>(0),dimension);
-			std::fill(arr_.begin(), arr_.end(), static_cast<scalarType>(0));
+			return arr_[index];
 		}
 		
-		[[nodiscard]] bool is_zero() const
+		scalarType& operator[](int index)
 		{
-			for (int i = 0; i < dimension; ++i)
-			{
-				if (arr_[i] != static_cast<scalarType>(0))
-				{
-					return false;
-				}
-			}
-			return true;
+			return arr_[index];
 		}
 		
-		scalarType squared_norm() const
-		{
-			return operator*(*this);
-		}
-		
-		scalarType norm() const
-		{
-			return std::sqrt(squared_norm());
-		}
-		
-		/*
-		void normalized()
-		{
-			//auto const copy{ normalize() };
-			//std::copy(copy.arr_.begin(), copy.arr_.end(), arr_.begin());
-			operator=(normalize());
-		}
-		 */
-		
-		Vec normalize() const
-		{
-			/*
-			if (is_zero())
-			{
-				throw std::exception("zero vector!");
-			}
-			 */
-			auto const factor{ static_cast<scalarType>(1) / norm() };
-			return operator*(factor);
-		}
-		
+		//代数运算
 		Vec operator-(Vec const& rhs) const
 		{
 			Vec res{};
@@ -83,15 +47,6 @@ namespace funu
 				res[i] = arr_[i] - rhs[i];
 			}
 			return res;
-		}
-		
-		//negative operator
-		void operator-(int)
-		{
-			for (int i = 0; i < dimension; ++i)
-			{
-				arr_[i] = -arr_[i];
-			}
 		}
 		
 		Vec operator+(Vec const& rhs) const
@@ -124,14 +79,42 @@ namespace funu
 			return res;
 		}
 		
-		scalarType const& operator[](int index) const
+		//negative operator
+		void operator-(int)
 		{
-			return arr_[index];
+			for (int i = 0; i < dimension; ++i)
+			{
+				arr_[i] = -arr_[i];
+			}
 		}
 		
-		scalarType& operator[](int index)
+		//似乎是无用函数
+		[[nodiscard]] bool is_zero() const
 		{
-			return arr_[index];
+			for (int i = 0; i < dimension; ++i)
+			{
+				if (arr_[i] != static_cast<scalarType>(0))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		scalarType squared_norm() const
+		{
+			return operator*(*this);
+		}
+		
+		scalarType norm() const
+		{
+			return std::sqrt(squared_norm());
+		}
+		
+		Vec normalize() const
+		{
+			//不检查0向量
+			return operator*(static_cast<scalarType>(1) / norm());
 		}
 	
 	private:
@@ -160,7 +143,7 @@ namespace funu
 		return vec * scalar;
 	}
 	
-	//corss product ^ 3d
+	//corss product ^ in 3d
 	template<typename scalarType>
 	Vec3<scalarType> operator^(Vec3<scalarType> const& lhs, Vec3<scalarType> const& rhs)
 	{
@@ -169,9 +152,9 @@ namespace funu
 		return Vec3<scalarType>{ y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2 };
 	}
 	
-	//scalar triple product
+	//scalar triple product 可计算六面体有向体积，使用矩阵特征值完成
 	
-	//perp product ^ 2d
+	//perp product ^ in 2d  向量拐向判断、平面三角形面积
 	template<typename scalarType>
 	scalarType operator^(Vec2<scalarType> const& lhs, Vec2<scalarType> const& rhs)
 	{
@@ -180,32 +163,41 @@ namespace funu
 		return x1 * y2 - x2 * y1;
 	}
 	
-	//squared matrix order n n<=4
+	//squared matrix order n
 	//列序为主序 sqMat[i][j]指的是第i列，第j行
-	//四则运算对象不可变
+	//代数运算对象不可变
 	template<typename scalarType, int dimension>
 	class SqMat final
 	{
 	public:
 		static_assert(dimension >= 1);
 		
-		template<int len>
-		using rawDataType = std::array<Vec<scalarType, len>, len>;
+		using DataType = std::array<Vec<scalarType, dimension>, dimension>;
 		
 		SqMat() : arrs_{}
 		{
 		}
-		explicit SqMat(rawDataType<dimension> const& data) : arrs_{ data }
+		
+		//输入同样列序为主序
+		explicit SqMat(DataType const& data) : arrs_{ data }
 		{
 		
 		}
 		~SqMat() = default;
 		
-		scalarType determinant() const;
-		SqMat transpose() const;
-		SqMat inverse() const;
+		//access methods
+		Vec<scalarType, dimension> const& operator[](int index) const
+		{
+			return arrs_[index];
+		}
 		
-		//线性组合
+		Vec<scalarType, dimension>& operator[](int index)
+		{
+			return arrs_[index];
+		}
+		
+		//代数运算
+		//矩阵列向量线性组合
 		Vec<scalarType, dimension> operator*(Vec<scalarType, dimension> const& rhs) const
 		{
 			Vec<scalarType, dimension> res{};
@@ -258,27 +250,35 @@ namespace funu
 			return res;
 		}
 		
-		Vec<scalarType, dimension> const& operator[](int index) const
-		{
-			return arrs_[index];
-		}
-		
-		Vec<scalarType, dimension>& operator[](int index)
-		{
-			return arrs_[index];
-		}
-	private:
-		template<int len>
-		scalarType determinate(rawDataType<len> const& data) const;
+		//矩阵其他属性
+		SqMat transpose() const;
+		//通过cofactor expansion计算
+		scalarType determinant() const;
+		//通过伴随矩阵计算
+		SqMat inverse() const;
 	
 	private:
-		rawDataType<dimension> arrs_;
+		DataType arrs_;
 	};
 	
 	template<typename scalarType, int dimension>
 	SqMat<scalarType, dimension> operator*(scalarType factor, SqMat<scalarType, dimension> const& rhs)
 	{
 		return rhs * factor;
+	}
+	
+	template<typename scalarType, int dimension>
+	SqMat<scalarType, dimension> SqMat<scalarType, dimension>::transpose() const
+	{
+		SqMat transposedSqM(*this);
+		for (int i = 1; i < dimension; ++i)
+		{
+			for (int j = 0; j < i; ++j)
+			{
+				std::swap(transposedSqM[i][j], transposedSqM[j][i]);
+			}
+		}
+		return transposedSqM;
 	}
 	
 	template<typename scalarType, int dimension>
@@ -302,6 +302,7 @@ namespace funu
 		}
 		else if (dimension == 4)
 		{
+			//cofactor expansion along the first column
 			return
 				arrs_[0][0] * (
 					arrs_[1][1] * arrs_[2][2] * arrs_[3][3] + arrs_[2][1] * arrs_[3][2] * arrs_[1][3]
@@ -309,76 +310,76 @@ namespace funu
 						arrs_[1][1] * arrs_[3][2] * arrs_[2][3] - arrs_[2][1] * arrs_[1][2] * arrs_[3][3]
 						- arrs_[3][1] * arrs_[2][2] * arrs_[1][3]
 				)
-					- arrs_[1][0] * (
-						arrs_[0][1] * arrs_[2][2] * arrs_[3][3] + arrs_[2][1] * arrs_[3][2] * arrs_[0][3]
-							+ arrs_[3][1] * arrs_[0][2] * arrs_[2][3] -
-							arrs_[0][1] * arrs_[3][2] * arrs_[2][3] - arrs_[2][1] * arrs_[0][2] * arrs_[3][3]
-							- arrs_[3][1] * arrs_[2][2] * arrs_[0][3]
+					- arrs_[0][1] * (
+					arrs_[1][0] * arrs_[2][2] * arrs_[3][3] + arrs_[2][0] * arrs_[3][2] * arrs_[1][3]
+						+ arrs_[3][0] * arrs_[1][2] * arrs_[2][3] -
+						arrs_[1][0] * arrs_[3][2] * arrs_[2][3] - arrs_[2][0] * arrs_[1][2] * arrs_[3][3]
+						- arrs_[3][0] * arrs_[2][2] * arrs_[1][3]
 					)
-					+ arrs_[2][0] * (
-						arrs_[0][1] * arrs_[1][2] * arrs_[3][3] + arrs_[1][1] * arrs_[3][2] * arrs_[0][3]
-							+ arrs_[3][1] * arrs_[0][2] * arrs_[1][3] -
-							arrs_[0][1] * arrs_[3][2] * arrs_[1][3] - arrs_[1][1] * arrs_[0][2] * arrs_[3][3]
-							- arrs_[3][1] * arrs_[1][2] * arrs_[0][3]
+					+ arrs_[0][2] * (
+					arrs_[1][0] * arrs_[2][1] * arrs_[3][3] + arrs_[2][0] * arrs_[3][1] * arrs_[1][3]
+						+ arrs_[3][0] * arrs_[1][1] * arrs_[2][3] -
+						arrs_[1][0] * arrs_[3][1] * arrs_[2][3] - arrs_[2][0] * arrs_[1][1] * arrs_[3][3]
+						- arrs_[3][0] * arrs_[2][1] * arrs_[1][3]
 					)
-					- arrs_[3][0] * (
-						arrs_[0][1] * arrs_[1][2] * arrs_[2][3] + arrs_[1][1] * arrs_[2][2] * arrs_[0][3]
-							+ arrs_[2][1] * arrs_[0][2] * arrs_[1][3] -
-							arrs_[0][1] * arrs_[2][2] * arrs_[1][3] - arrs_[1][1] * arrs_[0][2] * arrs_[2][3]
-							- arrs_[2][1] * arrs_[1][2] * arrs_[0][3]
+					- arrs_[0][3] * (
+					arrs_[1][0] * arrs_[2][1] * arrs_[3][2] + arrs_[2][0] * arrs_[3][1] * arrs_[1][2]
+						+ arrs_[3][0] * arrs_[1][1] * arrs_[2][2] -
+						arrs_[1][0] * arrs_[3][1] * arrs_[2][2] - arrs_[2][0] * arrs_[1][1] * arrs_[3][2]
+						- arrs_[3][0] * arrs_[2][1] * arrs_[1][2]
 					);
 		}
 		else if (dimension >= 5)
 		{
-			//cofactor expandsion along the first row
+			///cofactor expansion along the first column
 			int factor{};
 			scalarType sum{};
-			SqMat<scalarType, dimension - 1> subSqMat{};
-			int colIndex{};
-			for (int i = 0; i < dimension; ++i)
+			SqMat<scalarType, dimension - 1> minorMat{};
+			int minorMatColIndex{};
+			int minorMatRowIndex{};
+			//默认第一列展开，第k项
+			for (int k = 0; k < dimension; ++k)
 			{
-				for (int j = 0; j < dimension; ++j)
+				//构造minorMat
+				for (int i = 1; i < dimension; ++i,++minorMatColIndex)
 				{
-					if (i != j)
+					for (int j = 0; j < dimension; ++j)
 					{
-						std::copy(arrs_[j].begin() + 1, arrs_[j].end(), subSqMat[colIndex++].begin());
+						if (j!=k){
+							minorMat[minorMatColIndex][minorMatRowIndex]=arrs_[i][j];
+							++minorMatRowIndex;
+						}
 					}
+					minorMatRowIndex=0;
 				}
 				factor ^= 1;
-				sum = sum + ((factor << 1) - 1) * arrs_[i][0] * subSqMat.determinant();
-				colIndex = 0;
+				sum = sum + ((factor << 1) - 1) * arrs_[0][k] * minorMat.determinant();
+				minorMatColIndex = 0;
+				minorMatRowIndex=0;
 			}
 			return sum;
 		}
 	}
 	
 	template<typename scalarType, int dimension>
-	SqMat<scalarType, dimension> SqMat<scalarType, dimension>::transpose() const
-	{
-		SqMat transposedSqM(*this);
-		for (int i = 1; i < dimension; ++i)
-		{
-			for (int j = 0; j < i; ++j)
-			{
-				std::swap(transposedSqM[i][j], transposedSqM[j][i]);
-			}
-		}
-		return transposedSqM;
-	}
-	
-	template<typename scalarType, int dimension>
 	SqMat<scalarType, dimension> SqMat<scalarType, dimension>::inverse() const
 	{
-		//伴随矩阵方式计算逆矩阵
 		SqMat<scalarType, dimension> res{};
 		scalarType determinateInverse{ static_cast<scalarType>(1) / this->determinant() };
 		if (dimension == 1)
 		{
 			res[0][0] = static_cast<scalarType>(1) / arrs_[0][0];
-		}
-		else if (dimension >= 5)
+		}else if(dimension==2)
 		{
-			//i表示列，j表示行 res
+			res[0][0]=determinateInverse*arrs_[1][1];
+			res[0][1]=-determinateInverse*arrs_[0][1];
+			res[1][0]=-determinateInverse*arrs_[1][0];
+			res[1][1]=determinateInverse*arrs_[0][0];
+		}
+		else if (dimension >= 3)
+		{
+			//伴随矩阵
+			SqMat<scalarType, dimension> adjMat;
 			for (int i = 0; i < dimension; ++i)
 			{
 				for (int j = 0; j < dimension; ++j)
