@@ -378,31 +378,37 @@ namespace funu
 		}
 		else if (dimension >= 3)
 		{
-			//伴随矩阵
-			SqMat<scalarType, dimension> adjMat;
+			//伴随矩阵adjMat
+			auto& adjMat{res};
+			SqMat<scalarType, dimension-1> minorMat{};
+			//第i列，第j行，相对于伴随矩阵
 			for (int i = 0; i < dimension; ++i)
 			{
 				for (int j = 0; j < dimension; ++j)
 				{
-					SqMat::rawDataType<dimension - 1> subData{};
+					auto& value{adjMat[i][j]};
+					//minorMat的列和行
 					int colIndex{};
 					int rowIndex{};
-					//相对于arrs_的j列 i行
-					//m表示列，n表示行
+					//找出原矩阵的j列 i行对应的minor
+					//m表示列，n表示行，相对于原矩阵
 					for (int m = 0; m < dimension; ++m)
 					{
+						if (m==j){
+							continue;
+						}
 						for (int n = 0; n < dimension; ++n)
 						{
-							if (m != j && n != i)
+							if (n != i)
 							{
-								subData[colIndex][rowIndex++] = arrs_[m][n];
+								minorMat[colIndex][rowIndex++] = arrs_[m][n];
 							}
 						}
 						++colIndex;
 						rowIndex = 0;
 					}
 					int factor{ (i + j) % 2 == 0 ? (1) : (-1) };
-					res[i][j] = determinateInverse * factor * this->determinant(subData);
+					value = determinateInverse * factor * minorMat.determinant();
 				}
 			}
 		}
