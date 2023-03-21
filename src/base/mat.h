@@ -260,36 +260,15 @@ namespace funu
 		{
 			//伴随矩阵adjMat
 			auto& adjMat{ res };
-			Mat<scalarType, rowSize - 1, rowSize - 1> minorMat{};
-			//第i列，第j行，相对于伴随矩阵
+			//第i行，第j列，相对于伴随矩阵
 			for (int i = 0; i < rowSize; ++i)
 			{
-				for (int j = 0; j < rowSize; ++j)
+				for (int j = 0; j < colSize; ++j)
 				{
-					auto& value{ adjMat[i][j] };
-					//minorMat的列和行
-					int colIndex{};
-					int rowIndex{};
-					//找出原矩阵的j列 i行对应的minor
-					//m表示列，n表示行，相对于原矩阵
-					for (int m = 0; m < rowSize; ++m)
-					{
-						if (m == j)
-						{
-							continue;
-						}
-						for (int n = 0; n < rowSize; ++n)
-						{
-							if (n != i)
-							{
-								minorMat[colIndex][rowIndex++] = arrs_[m][n];
-							}
-						}
-						++colIndex;
-						rowIndex = 0;
-					}
-					int factor{ (i + j) % 2 == 0 ? (1) : (-1) };
-					value = determinateInverse * factor * minorMat.determinant();
+					//[j,i]的minor
+					auto minorMat{ extractSubMat<rowSize - 1, colSize - 1>(0, 0, j, i) };
+					int factor{ (j + i) % 2 == 0 ? (1) : (-1) };
+					adjMat[i][j] = determinateInverse * factor * minorMat.determinant();
 				}
 			}
 		}
