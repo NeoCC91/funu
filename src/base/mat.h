@@ -131,23 +131,28 @@ namespace funu
 			int colIgnore = -1) const
 		{
 			Mat<scalarType, subRowSize, subColSize> res;
-			for (int i = 0; i < subRowSize; ++i)
+			int targetRow{ rowStart };
+			for (int i = 0; i < subRowSize; ++i, ++targetRow)
 			{
-				int targetRow{ rowStart + i };
 				if (targetRow == rowIgnore)
 				{
-					++targetRow;
+					--i;
+					continue;
 				}
-				for (int j = 0; j < subColSize; ++j)
+				int targetCol = colStart;
+				for (int j = 0; j < subColSize; ++j, ++targetCol)
 				{
-					int targetCol{ colStart + j };
-					if (targetCol == colIgnore)
+					if (targetCol != colIgnore)
 					{
-						++targetCol;
+						res[i][j] = arrs_[targetRow][targetCol];
 					}
-					res[i][j] = arrs_[targetRow][targetCol];
+					else
+					{
+						--j;
+					}
 				}
 			}
+			return res;
 		}
 	
 	private:
@@ -185,38 +190,38 @@ namespace funu
 		else if (rowSize == 3)
 		{
 			return
-				arrs_[0][0] * arrs_[1][1] * arrs_[2][2] + arrs_[1][0] * arrs_[2][1] * arrs_[0][2]
-					+ arrs_[2][0] * arrs_[0][1] * arrs_[1][2] -
-					arrs_[0][0] * arrs_[2][1] * arrs_[1][2] - arrs_[1][0] * arrs_[0][1] * arrs_[2][2]
-					- arrs_[2][0] * arrs_[1][1] * arrs_[0][2];
+				arrs_[0][0] * arrs_[1][1] * arrs_[2][2] + arrs_[0][1] * arrs_[1][2] * arrs_[2][0]
+					+ arrs_[0][2] * arrs_[1][0] * arrs_[2][1] -
+					arrs_[0][0] * arrs_[1][2] * arrs_[2][1] - arrs_[0][1] * arrs_[1][0] * arrs_[2][2]
+					- arrs_[0][2] * arrs_[1][1] * arrs_[2][0];
 		}
 		else if (rowSize == 4)
 		{
 			//cofactor expansion along the first row
 			return
 				arrs_[0][0] * (
-					arrs_[1][1] * arrs_[2][2] * arrs_[3][3] + arrs_[2][1] * arrs_[3][2] * arrs_[1][3]
-						+ arrs_[3][1] * arrs_[1][2] * arrs_[2][3] -
-						arrs_[1][1] * arrs_[3][2] * arrs_[2][3] - arrs_[2][1] * arrs_[1][2] * arrs_[3][3]
-						- arrs_[3][1] * arrs_[2][2] * arrs_[1][3]
+					arrs_[1][1] * arrs_[2][2] * arrs_[3][3] + arrs_[1][2] * arrs_[2][3] * arrs_[3][1]
+						+ arrs_[1][3] * arrs_[2][1] * arrs_[3][2] -
+						arrs_[1][1] * arrs_[2][3] * arrs_[3][2] - arrs_[1][2] * arrs_[2][1] * arrs_[3][3]
+						- arrs_[1][3] * arrs_[2][2] * arrs_[3][1]
 				)
 					- arrs_[0][1] * (
-						arrs_[1][0] * arrs_[2][2] * arrs_[3][3] + arrs_[2][0] * arrs_[3][2] * arrs_[1][3]
-							+ arrs_[3][0] * arrs_[1][2] * arrs_[2][3] -
-							arrs_[1][0] * arrs_[3][2] * arrs_[2][3] - arrs_[2][0] * arrs_[1][2] * arrs_[3][3]
-							- arrs_[3][0] * arrs_[2][2] * arrs_[1][3]
+						arrs_[1][0] * arrs_[2][2] * arrs_[3][3] + arrs_[1][2] * arrs_[2][3] * arrs_[3][0]
+							+ arrs_[1][3] * arrs_[2][0] * arrs_[3][2] -
+							arrs_[1][0] * arrs_[2][3] * arrs_[3][2] - arrs_[1][2] * arrs_[2][0] * arrs_[3][3]
+							- arrs_[1][3] * arrs_[2][2] * arrs_[3][0]
 					)
 					+ arrs_[0][2] * (
-						arrs_[1][0] * arrs_[2][1] * arrs_[3][3] + arrs_[2][0] * arrs_[3][1] * arrs_[1][3]
-							+ arrs_[3][0] * arrs_[1][1] * arrs_[2][3] -
-							arrs_[1][0] * arrs_[3][1] * arrs_[2][3] - arrs_[2][0] * arrs_[1][1] * arrs_[3][3]
-							- arrs_[3][0] * arrs_[2][1] * arrs_[1][3]
+						arrs_[1][0] * arrs_[2][1] * arrs_[3][3] + arrs_[1][1] * arrs_[2][3] * arrs_[3][0]
+							+ arrs_[1][3] * arrs_[2][0] * arrs_[3][1] -
+							arrs_[1][0] * arrs_[2][3] * arrs_[3][1] - arrs_[1][1] * arrs_[2][0] * arrs_[3][3]
+							- arrs_[1][3] * arrs_[2][1] * arrs_[3][0]
 					)
 					- arrs_[0][3] * (
-						arrs_[1][0] * arrs_[2][1] * arrs_[3][2] + arrs_[2][0] * arrs_[3][1] * arrs_[1][2]
-							+ arrs_[3][0] * arrs_[1][1] * arrs_[2][2] -
-							arrs_[1][0] * arrs_[3][1] * arrs_[2][2] - arrs_[2][0] * arrs_[1][1] * arrs_[3][2]
-							- arrs_[3][0] * arrs_[2][1] * arrs_[1][2]
+						arrs_[1][0] * arrs_[2][1] * arrs_[3][2] + arrs_[1][1] * arrs_[2][2] * arrs_[3][0]
+							+ arrs_[1][2] * arrs_[2][0] * arrs_[3][1] -
+							arrs_[1][0] * arrs_[2][2] * arrs_[3][1] - arrs_[1][1] * arrs_[2][0] * arrs_[3][2]
+							- arrs_[1][2] * arrs_[2][1] * arrs_[3][0]
 					);
 		}
 		else if (rowSize >= 5)
@@ -224,29 +229,12 @@ namespace funu
 			///cofactor expansion along the first row
 			int factor{};
 			scalarType sum{};
-			Mat<scalarType, rowSize - 1, rowSize - 1> minorMat{};
-			int minorMatColIndex{};
-			int minorMatRowIndex{};
-			//默认第一列展开，第k项
+			//默认第一行展开，第k项
 			for (int k = 0; k < rowSize; ++k)
 			{
-				//构造minorMat
-				for (int i = 1; i < rowSize; ++i, ++minorMatColIndex)
-				{
-					for (int j = 0; j < rowSize; ++j)
-					{
-						if (j != k)
-						{
-							minorMat[minorMatColIndex][minorMatRowIndex] = arrs_[i][j];
-							++minorMatRowIndex;
-						}
-					}
-					minorMatRowIndex = 0;
-				}
+				auto minorMat = extractSubMat<rowSize - 1, colSize - 1>(1, 0, 0, k);
 				factor ^= 1;
 				sum = sum + ((factor << 1) - 1) * arrs_[0][k] * minorMat.determinant();
-				minorMatColIndex = 0;
-				minorMatRowIndex = 0;
 			}
 			return sum;
 		}
