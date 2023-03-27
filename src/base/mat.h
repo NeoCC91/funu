@@ -20,7 +20,7 @@ namespace funu
 		friend Vec<vtype, c> operator*(Vec<vtype, r> const&, Mat<vtype, r, c> const&);
 	
 	public:
-		static_assert(rowSize >= 1 && colSize >= 1);
+		//static_assert(rowSize < 1 || colSize < 1);
 		
 		using DataType = std::array<Vec<scalarType, colSize>, rowSize>;
 		
@@ -125,12 +125,11 @@ namespace funu
 		
 		//提取子矩阵，会不会导致重载失败？
 		template<int subRowSize, int subColSize>
-		Mat<scalarType, subRowSize, subColSize> extractSubMat(int rowStart,
+		void extractSubMat(Mat<scalarType, subRowSize, subColSize>& subMat, int rowStart,
 			int colStart,
 			int rowIgnore = -1,
 			int colIgnore = -1) const
 		{
-			Mat<scalarType, subRowSize, subColSize> res;
 			int targetRow{ rowStart };
 			for (int i = 0; i < subRowSize; ++i, ++targetRow)
 			{
@@ -144,7 +143,7 @@ namespace funu
 				{
 					if (targetCol != colIgnore)
 					{
-						res[i][j] = arrs_[targetRow][targetCol];
+						subMat[i][j] = arrs_[targetRow][targetCol];
 					}
 					else
 					{
@@ -152,7 +151,6 @@ namespace funu
 					}
 				}
 			}
-			return res;
 		}
 	
 	private:
@@ -232,7 +230,8 @@ namespace funu
 			//默认第一行展开，第k项
 			for (int k = 0; k < rowSize; ++k)
 			{
-				auto minorMat = extractSubMat<rowSize - 1, colSize - 1>(1, 0, 0, k);
+				Mat<scalarType, rowSize - 1, colSize - 1> minorMat;
+				extractSubMat(minorMat, 1, 0, 0, k);
 				factor ^= 1;
 				sum = sum + ((factor << 1) - 1) * arrs_[0][k] * minorMat.determinant();
 			}
@@ -266,7 +265,8 @@ namespace funu
 				for (int j = 0; j < colSize; ++j)
 				{
 					//[j,i]的minor
-					auto minorMat{ extractSubMat<rowSize - 1, colSize - 1>(0, 0, j, i) };
+					Mat<scalarType, rowSize - 1, colSize - 1> minorMat;
+					extractSubMat(minorMat, 0, 0, j, i);
 					int factor{ (j + i) % 2 == 0 ? (1) : (-1) };
 					adjMat[i][j] = determinateInverse * factor * minorMat.determinant();
 				}

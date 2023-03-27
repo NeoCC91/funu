@@ -126,5 +126,6 @@ namespace funu
 		vertices_.push_back(v);
 		return vertices_.size() - 1;
 	}
+	
 }
 #endif //FUNU_SRC_BASE_HALFEDGE_H_
