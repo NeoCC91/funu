@@ -152,7 +152,7 @@ namespace funu
 		return Vec3<scalarType>{ y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2 };
 	}
 	
-	//scalar triple product 可计算六面体有向体积，使用矩阵特征值完成
+	//scalar triple product 可计算六面体有向体积，判断4点是否共面，使用矩阵特征值完成
 	
 	//perp product ^ in 2d  向量拐向判断、平面三角形面积
 	template<typename scalarType>
