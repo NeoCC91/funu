@@ -80,12 +80,14 @@ namespace funu
 		}
 		
 		//negative operator
-		void operator-(int)
+		Vec operator-(int) const
 		{
+			Vec res{};
 			for (int i = 0; i < dimension; ++i)
 			{
-				arr_[i] = -arr_[i];
+				res[i] = -arr_[i];
 			}
+			return res;
 		}
 		
 		//似乎是无用函数
@@ -108,7 +110,7 @@ namespace funu
 		
 		scalarType norm() const
 		{
-			return std::sqrt(squared_norm());
+			return static_cast<scalarType>(std::sqrt(squared_norm()));
 		}
 		
 		Vec normalize() const
@@ -123,18 +125,18 @@ namespace funu
 	
 	template<typename scalarType>
 	using Vec2 = Vec<scalarType, 2>;
-	using vec2f = Vec2<float>;
-	using vec2d = Vec2<double>;
+	using Vec2f = Vec2<float>;
+	using Vec2d = Vec2<double>;
 	
 	template<typename scalarType>
 	using Vec3 = Vec<scalarType, 3>;
-	using vec3f = Vec3<float>;
-	using vec3d = Vec3<double>;
+	using Vec3f = Vec3<float>;
+	using Vec3d = Vec3<double>;
 	
 	template<typename scalarType>
 	using Vec4 = Vec<scalarType, 4>;
-	using vec4f = Vec4<float>;
-	using vec4d = Vec4<double>;
+	using Vec4f = Vec4<float>;
+	using Vec4d = Vec4<double>;
 	
 	//dot product any dimension
 	template<typename scalarType, int dimension>
