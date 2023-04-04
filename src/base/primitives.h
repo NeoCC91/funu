@@ -12,8 +12,27 @@ namespace funu
 	
 	template<typename scalarType>
 	class line2{
-	
+	public:
+		//隐式方程 ax+by+c=0
+		line2(scalarType a,scalarType b,scalarType c):dir_{-b,a}
+		{
+			auto factor{static_cast<scalarType>(1)/dir_.norm()};
+			dir_=dir_*factor;
+			c_=c*factor;
+		}
 		
+		//点和方向
+		line2(Vec2<scalarType> const& ori,Vec2<scalarType> const& dir):origin_{ori},dir_{dir.normalize()}{
+		
+		}
+		
+		
+	private:
+		//线上点
+		Vec2<scalarType> origin_;
+		//单位向量，方向。-b,a
+		Vec2<scalarType> dir_;
+		scalarType c_;
 	};
 	
 	template<typename scalarType>
@@ -24,7 +43,9 @@ namespace funu
 		{
 		}
 	private:
+		//线上点
 		Vec3<scalarType> origin_;
+		//单位向量，方向
 		Vec3<scalarType> dir_;
 	};
 	
@@ -35,7 +56,7 @@ namespace funu
 	class Plane
 	{
 	public:
-		//ax+by+cz+d=0
+		//隐式方程 ax+by+cz+d=0
 		Plane(scalarType a,scalarType b,scalarType c,scalarType d):normal_{a,b,c}
 		{
 			auto factor{static_cast<scalarType>(1)/normal_.norm()};
@@ -44,13 +65,29 @@ namespace funu
 		}
 		
 		//点和法向
-		Plane(Vec3<scalarType> const& ori,Vec3<scalarType> const& n):origin_{ori},normal_{n.normalize()}
+		Plane(Vec3<scalarType> const& v,Vec3<scalarType> const& normal):origin_{v},normal_{normal.normalize()}
 		{
 			d_=-origin_*normal_;
 		}
 		
+		//三个点
+		Plane(Vec3<scalarType> const& v0,Vec3<scalarType> const& v1,Vec3<scalarType> const& v2):
+		Plane(v0,(v1-v0)^(v2-v0))
+		{
+		
+		}
+		
+		//获取平面上的点
+		Vec3<scalarType> const& pointOn() const{
+			return origin_;
+		}
+		//获取平面法向，单位向量
+		Vec3<scalarType> const& normal() const{
+			return normal_;
+		}
+		
 		//点到面的有向距离
-		scalarType pntDis(Vec3<scalarType> const& pnt)
+		scalarType pntDis(Vec3<scalarType> const& pnt) const
 		{
 			return pnt*normal_+d_;
 		}
@@ -59,8 +96,9 @@ namespace funu
 		
 		
 	private:
+		//面内点
 		Vec3<scalarType> origin_;
-		// a,b,c
+		//单位向量，法向。a,b,c
 		Vec3<scalarType> normal_;
 		scalarType d_;
 	};
