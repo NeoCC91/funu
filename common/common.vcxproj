@@ -139,13 +139,6 @@
       <AdditionalDependencies>OpenMeshCore.lib;OpenMeshTools.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="include\MeshOps.h" />
-    <ClInclude Include="include\TriMesh.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\MeshOps.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
