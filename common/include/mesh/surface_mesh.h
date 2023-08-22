@@ -41,7 +41,7 @@ namespace funu
 
 
 
-	private:
+	public:
 
 		//ÍØÆË½á¹¹
 		std::vector<Vertex> verts_;
