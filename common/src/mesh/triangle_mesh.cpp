@@ -1,10 +1,10 @@
-#include <mesh/surface_mesh.h>
+#include <mesh/triangle_mesh.h>
 
 namespace funu
 {
-	surface_mesh::surface_mesh() = default;
+	TriMesh::TriMesh() = default;
 
-	surface_mesh::surface_mesh(surface_mesh const& src)
+	TriMesh::TriMesh(TriMesh const& src)
 	{
 		verts_ = src.verts_;
 		faces_ = src.faces_;
@@ -12,7 +12,7 @@ namespace funu
 		points_ = src.points_;
 	}
 
-	surface_mesh::surface_mesh(surface_mesh&& src) noexcept
+	TriMesh::TriMesh(TriMesh&& src) noexcept
 	{
 		verts_.swap(src.verts_);
 		faces_.swap(src.faces_);
@@ -20,9 +20,9 @@ namespace funu
 		points_.swap(src.points_);
 	}
 
-	surface_mesh::~surface_mesh() = default;
+	TriMesh::~TriMesh() = default;
 
-	surface_mesh& surface_mesh::operator=(surface_mesh const& rhs)
+	TriMesh& TriMesh::operator=(TriMesh const& rhs)
 	{
 		if (this != &rhs)
 		{
@@ -34,7 +34,7 @@ namespace funu
 		return *this;
 	}
 
-	surface_mesh& surface_mesh::operator=(surface_mesh&& rhs) noexcept
+	TriMesh& TriMesh::operator=(TriMesh&& rhs) noexcept
 	{
 		verts_.swap(rhs.verts_);
 		faces_.swap(rhs.faces_);

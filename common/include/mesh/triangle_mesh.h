@@ -7,16 +7,16 @@
 namespace funu
 {
 	//三角网格
-	class FUNU_API surface_mesh
+	class FUNU_API TriMesh
 	{
 	public:
-		surface_mesh();
-		surface_mesh(surface_mesh const& src);
-		surface_mesh(surface_mesh&& src) noexcept;
-		~surface_mesh();
+		TriMesh();
+		TriMesh(TriMesh const& src);
+		TriMesh(TriMesh&& src) noexcept;
+		~TriMesh();
 
-		surface_mesh& operator=(surface_mesh const& rhs);
-		surface_mesh& operator=(surface_mesh&& rhs) noexcept;
+		TriMesh& operator=(TriMesh const& rhs);
+		TriMesh& operator=(TriMesh&& rhs) noexcept;
 
 		//拓扑结构
 		struct HalfEdge
