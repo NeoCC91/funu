@@ -1,4 +1,7 @@
+#include "mesh/triangle_mesh.h"
+
 #include <mesh/triangle_mesh.h>
+#include <array>
 
 namespace funu
 {
@@ -41,5 +44,55 @@ namespace funu
 		halfedges_.swap(rhs.halfedges_);
 		points_.swap(rhs.points_);
 		return *this;
+	}
+
+	auto TriMesh::v_n() const
+	{
+		return verts_.size();
+	}
+
+	inline 
+	bool TriMesh::add_vertex(Vec4 const& pnt)
+	{
+		verts_.emplace_back();
+		points_.push_back(pnt);
+		return true;
+	}
+
+	inline 
+	bool TriMesh::remove_vertex(IndexType vert_idx)
+	{
+		verts_deleted_[vert_idx] = true;
+		return true;
+	}
+
+	auto TriMesh::f_n() const
+	{
+		return faces_.size();
+	}
+
+
+	inline 
+	bool TriMesh::add_face(IndexType vert_idx0, IndexType vert_idx1, IndexType vert_idx2)
+	{
+		std::array input_verts{vert_idx0,vert_idx1,vert_idx2,vert_idx0};
+		return true;
+	}
+
+	inline 
+	bool TriMesh::remove_face(IndexType face_idx)
+	{
+		faces_deleted_[face_idx] = true;
+		return true;
+	}
+
+	auto TriMesh::he_n() const
+	{
+		return halfedges_.size();
+	}
+
+	auto TriMesh::e_n() const
+	{
+		return halfedges_.size() >> 1;
 	}
 }

@@ -21,36 +21,72 @@ namespace funu
 		//拓扑结构
 		struct HalfEdge
 		{
-			IndexType next_;
-			IndexType prev_;
-			IndexType face_;
-			IndexType to_;
+			HalfEdge(): next{INVALID_IDX}, prev{INVALID_IDX}, face{INVALID_IDX}, to{INVALID_IDX}
+			{
+			}
+			//上一个半边
+			IndexType next;
+			//下一个半边
+			IndexType prev;
+			//所属面片
+			IndexType face;
+			//指向的顶点
+			IndexType to;
 		};
 
 		struct Vertex
 		{
-			IndexType out_;
+			Vertex(): out{INVALID_IDX}
+			{
+			}
+			//顶点出发的任意一个半边
+			IndexType out;
 		};
 
 		struct Face
 		{
-			IndexType hedge_;
+			Face(): hedge{INVALID_IDX}
+			{
+			}
+			//面片所含半边
+			IndexType hedge;
 		};
 
 	public:
+		// API
+		//顶点操作
+		//点量
+		auto v_n() const;
+		bool add_vertex(Vec4 const& pnt);
+		bool remove_vertex(IndexType vert_idx);
 
+		//面片操作
+		//面量
+		auto f_n() const;
+		bool add_face(IndexType vert_idx0, IndexType vert_idx1, IndexType vert_idx2);
+		bool remove_face(IndexType face_idx);
 
+		//半边操作
+		//半边量
+		auto he_n() const;
+		//边量
+		auto e_n() const;
 
-	public:
+	private:
+		//内部api
 
+	private:
 		//拓扑结构
 		std::vector<Vertex> verts_;
 		std::vector<Face> faces_;
 		std::vector<HalfEdge> halfedges_;
 
 		//坐标数据
-		std::vector<Vec4f> points_;
+		std::vector<Vec4> points_;
 
 		//标记数据
+		std::vector<bool> verts_deleted_;
+		std::vector<bool> faces_deleted_;
+		std::vector<bool> halfedges_deleted_;
 	};
 }
