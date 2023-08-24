@@ -1,6 +1,4 @@
 #include "mesh/triangle_mesh.h"
-
-#include <mesh/triangle_mesh.h>
 #include <array>
 
 namespace funu
@@ -9,17 +7,17 @@ namespace funu
 
 	TriMesh::TriMesh(TriMesh const& src)
 	{
-		verts_ = src.verts_;
-		faces_ = src.faces_;
-		halfedges_ = src.halfedges_;
+		verts_conn_ = src.verts_conn_;
+		faces_conn_ = src.faces_conn_;
+		halfedges_conn_ = src.halfedges_conn_;
 		points_ = src.points_;
 	}
 
 	TriMesh::TriMesh(TriMesh&& src) noexcept
 	{
-		verts_.swap(src.verts_);
-		faces_.swap(src.faces_);
-		halfedges_.swap(src.halfedges_);
+		verts_conn_.swap(src.verts_conn_);
+		faces_conn_.swap(src.faces_conn_);
+		halfedges_conn_.swap(src.halfedges_conn_);
 		points_.swap(src.points_);
 	}
 
@@ -29,9 +27,9 @@ namespace funu
 	{
 		if (this != &rhs)
 		{
-			verts_ = rhs.verts_;
-			faces_ = rhs.faces_;
-			halfedges_ = rhs.halfedges_;
+			verts_conn_ = rhs.verts_conn_;
+			faces_conn_ = rhs.faces_conn_;
+			halfedges_conn_ = rhs.halfedges_conn_;
 			points_ = rhs.points_;
 		}
 		return *this;
@@ -39,9 +37,9 @@ namespace funu
 
 	TriMesh& TriMesh::operator=(TriMesh&& rhs) noexcept
 	{
-		verts_.swap(rhs.verts_);
-		faces_.swap(rhs.faces_);
-		halfedges_.swap(rhs.halfedges_);
+		verts_conn_.swap(rhs.verts_conn_);
+		faces_conn_.swap(rhs.faces_conn_);
+		halfedges_conn_.swap(rhs.halfedges_conn_);
 		points_.swap(rhs.points_);
 		return *this;
 	}
@@ -49,54 +47,132 @@ namespace funu
 	inline 
 	size_t TriMesh::v_n() const
 	{
-		return verts_.size();
+		return verts_conn_.size();
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle& TriMesh::outgoing_hedge(VertexHandle vh)
+	{
+		return verts_conn_[vh].outg_heh;
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle const& TriMesh::outgoing_hedge(VertexHandle vh) const
+	{
+		return verts_conn_[vh].outg_heh;
+	}
+
+	inline 
+	Vec4& TriMesh::point(VertexHandle vh)
+	{
+		return points_[vh];
+	}
+
+	inline 
+	Vec4 const& TriMesh::point(VertexHandle vh) const
+	{
+		return points_[vh];
 	}
 
 	inline 
 	bool TriMesh::add_vertex(Vec4 const& pnt)
 	{
-		verts_.emplace_back();
+		verts_conn_.emplace_back();
 		points_.push_back(pnt);
 		verts_deleted_.push_back({});
 		return true;
 	}
 
 	inline 
-	bool TriMesh::remove_vertex(IndexType vert_idx)
+	bool TriMesh::remove_vertex(VertexHandle vh)
 	{
-		verts_deleted_[vert_idx] = true;
+		verts_deleted_[vh] = true;
 		return true;
 	}
 
 	inline 
 	size_t TriMesh::f_n() const
 	{
-		return faces_.size();
+		return faces_conn_.size();
 	}
 
 	inline 
-	bool TriMesh::add_face(IndexType vert_idx0, IndexType vert_idx1, IndexType vert_idx2)
+	TriMesh::HalfedgeHandle& TriMesh::inner_hedge(FaceHandle fh)
 	{
-		std::array input_verts{vert_idx0,vert_idx1,vert_idx2,vert_idx0};
+		return faces_conn_[fh].inner_heh;
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle const& TriMesh::inner_hedge(FaceHandle fh) const
+	{
+		return faces_conn_[fh].inner_heh;
+	}
+
+	inline 
+	bool TriMesh::add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2)
+	{
+		std::array input_verts{vh0,vh1,vh2,vh0};
 		return true;
 	}
 
 	inline 
-	bool TriMesh::remove_face(IndexType face_idx)
+	bool TriMesh::remove_face(FaceHandle fh)
 	{
-		faces_deleted_[face_idx] = true;
+		faces_deleted_[fh] = true;
 		return true;
 	}
 
 	inline 
 	size_t TriMesh::he_n() const
 	{
-		return halfedges_.size();
+		return halfedges_conn_.size();
 	}
 
 	inline 
 	size_t TriMesh::e_n() const
 	{
-		return halfedges_.size() >> 1;
+		return halfedges_conn_.size() >> 1;
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle& TriMesh::next_hedge(HalfedgeHandle heh)
+	{
+		return halfedges_conn_[heh].next_heh;
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle const& TriMesh::next_hedge(HalfedgeHandle heh) const
+	{
+		return halfedges_conn_[heh].next_heh;
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle& TriMesh::prev_hedge(HalfedgeHandle heh)
+	{
+		return halfedges_conn_[heh].prev_heh;
+	}
+	
+	inline 
+	TriMesh::HalfedgeHandle const& TriMesh::prev_hedge(HalfedgeHandle heh) const
+	{
+		return halfedges_conn_[heh].prev_heh;
+	}
+
+	inline
+	TriMesh::HalfedgeHandle TriMesh::opp_hedge(HalfedgeHandle heh) const
+	{
+		return (heh & 1) ? (heh - 1) : (heh + 1);
+	}
+	
+	inline
+	TriMesh::FaceHandle& TriMesh::adhereto_face(HalfedgeHandle heh)
+	{
+		return halfedges_conn_[heh].adt_fh;
+	}
+	
+	inline
+	TriMesh::FaceHandle const& TriMesh::adhereto_face(HalfedgeHandle heh) const
+	{
+		return halfedges_conn_[heh].adt_fh;
 	}
 }

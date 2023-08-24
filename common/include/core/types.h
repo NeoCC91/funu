@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <Eigen/Dense>
 
 namespace funu
@@ -11,7 +10,4 @@ namespace funu
 	using Vec2 = Eigen::Vector2f;
 	using Vec3 = Eigen::Vector3f;
 	using Vec4 = Eigen::Vector4f;
-
-	using IndexType = std::uint32_t;
-	static constexpr IndexType INVALID_IDX{std::numeric_limits<IndexType>::max()};
 }
