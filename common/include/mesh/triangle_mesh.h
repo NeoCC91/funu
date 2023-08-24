@@ -56,21 +56,25 @@ namespace funu
 		// API
 		//顶点操作
 		//点量
-		auto v_n() const;
+		size_t v_n() const;
 		bool add_vertex(Vec4 const& pnt);
 		bool remove_vertex(IndexType vert_idx);
 
 		//面片操作
 		//面量
-		auto f_n() const;
+		size_t f_n() const;
+
+
 		bool add_face(IndexType vert_idx0, IndexType vert_idx1, IndexType vert_idx2);
+
+
 		bool remove_face(IndexType face_idx);
 
 		//半边操作
 		//半边量
-		auto he_n() const;
+		size_t he_n() const;
 		//边量
-		auto e_n() const;
+		size_t e_n() const;
 
 	private:
 		//内部api
@@ -81,7 +85,7 @@ namespace funu
 		std::vector<Face> faces_;
 		std::vector<HalfEdge> halfedges_;
 
-		//坐标数据
+		//位置数据
 		std::vector<Vec4> points_;
 
 		//标记数据

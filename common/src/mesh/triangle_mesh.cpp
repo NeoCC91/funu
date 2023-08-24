@@ -46,7 +46,8 @@ namespace funu
 		return *this;
 	}
 
-	auto TriMesh::v_n() const
+	inline 
+	size_t TriMesh::v_n() const
 	{
 		return verts_.size();
 	}
@@ -56,6 +57,7 @@ namespace funu
 	{
 		verts_.emplace_back();
 		points_.push_back(pnt);
+		verts_deleted_.push_back({});
 		return true;
 	}
 
@@ -66,11 +68,11 @@ namespace funu
 		return true;
 	}
 
-	auto TriMesh::f_n() const
+	inline 
+	size_t TriMesh::f_n() const
 	{
 		return faces_.size();
 	}
-
 
 	inline 
 	bool TriMesh::add_face(IndexType vert_idx0, IndexType vert_idx1, IndexType vert_idx2)
@@ -86,12 +88,14 @@ namespace funu
 		return true;
 	}
 
-	auto TriMesh::he_n() const
+	inline 
+	size_t TriMesh::he_n() const
 	{
 		return halfedges_.size();
 	}
 
-	auto TriMesh::e_n() const
+	inline 
+	size_t TriMesh::e_n() const
 	{
 		return halfedges_.size() >> 1;
 	}
