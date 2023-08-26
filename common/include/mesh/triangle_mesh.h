@@ -19,11 +19,15 @@ namespace funu
 		TriMesh& operator=(TriMesh const& rhs);
 		TriMesh& operator=(TriMesh&& rhs) noexcept;
 
-		using HandleType = std::uint32_t;
-		static constexpr HandleType INVALID_HANDLE{std::numeric_limits<HandleType>::max()};
-		using VertexHandle = HandleType;
-		using FaceHandle = HandleType;
-		using HalfedgeHandle = HandleType;
+		struct TypeTraits
+		{
+			using HandleType = std::uint32_t;
+		};
+
+		static constexpr TypeTraits::HandleType INVALID_HANDLE{std::numeric_limits<TypeTraits::HandleType>::max()};
+		using VertexHandle = TypeTraits::HandleType;
+		using FaceHandle = TypeTraits::HandleType;
+		using HalfedgeHandle = TypeTraits::HandleType;
 
 		//拓扑结构
 		struct HalfEdge
@@ -46,7 +50,7 @@ namespace funu
 			Vertex(): outg_heh{INVALID_HANDLE}
 			{
 			}
-			//顶点出发的任意一个半边
+			//顶点出发的半边(边界点时，出边为某个边界半边)
 			HalfedgeHandle outg_heh;
 		};
 
@@ -70,8 +74,15 @@ namespace funu
 		//获取坐标数据
 		Vec4& point(VertexHandle vh);
 		Vec4 const& point(VertexHandle vh) const;
+		//孤立点
+		bool is_isolated(VertexHandle vh) const;
+		//边界点
+		bool is_boundary(VertexHandle vh) const;
+		//非流型点
+		bool is_manifold(VertexHandle vh) const;
 		//加点
 		bool add_vertex(Vec4 const& pnt);
+		//删点
 		bool remove_vertex(VertexHandle vh);
 
 		//面片操作
@@ -97,11 +108,16 @@ namespace funu
 		//上一条半边
 		HalfedgeHandle& prev_hedge(HalfedgeHandle heh);
 		HalfedgeHandle const& prev_hedge(HalfedgeHandle heh) const;
-		//反向半边
-		HalfedgeHandle opp_hedge(HalfedgeHandle heh) const;
 		//所属面片
 		FaceHandle& adhereto_face(HalfedgeHandle heh);
 		FaceHandle const& adhereto_face(HalfedgeHandle heh) const;
+		//指向顶点
+		VertexHandle& to_vertex(HalfedgeHandle heh);
+		VertexHandle const& to_vertex(HalfedgeHandle heh) const;
+		//反向半边
+		HalfedgeHandle opp_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle ccw_rotated_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle cw_rotated_hedge(HalfedgeHandle heh) const;
 
 		//顶点出边访问器
 		friend class VOheCirculator;
@@ -124,6 +140,7 @@ namespace funu
 		std::vector<bool> halfedges_deleted_;
 	};
 
+	//访问器
 	class VOheCirculator
 	{
 	public:
@@ -139,6 +156,12 @@ namespace funu
 
 		//ccw
 		void operator++()
+		{
+			
+		}
+
+		//cw
+		void operator--()
 		{
 			
 		}

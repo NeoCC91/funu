@@ -75,6 +75,24 @@ namespace funu
 	}
 
 	inline 
+	bool TriMesh::is_isolated(VertexHandle vh) const
+	{
+		return verts_conn_[vh].outg_heh == INVALID_HANDLE;
+	}
+
+	bool TriMesh::is_boundary(VertexHandle vh) const
+	{
+		return halfedges_conn_[verts_conn_[vh].outg_heh].adt_fh == INVALID_HANDLE;
+	}
+
+	bool TriMesh::is_manifold(VertexHandle vh) const
+	{
+		int outg_num{};
+		auto heh{verts_conn_[vh].outg_heh};
+		return outg_num<2;
+	}
+
+	inline 
 	bool TriMesh::add_vertex(Vec4 const& pnt)
 	{
 		verts_conn_.emplace_back();
@@ -157,12 +175,6 @@ namespace funu
 	{
 		return halfedges_conn_[heh].prev_heh;
 	}
-
-	inline
-	TriMesh::HalfedgeHandle TriMesh::opp_hedge(HalfedgeHandle heh) const
-	{
-		return (heh & 1) ? (heh - 1) : (heh + 1);
-	}
 	
 	inline
 	TriMesh::FaceHandle& TriMesh::adhereto_face(HalfedgeHandle heh)
@@ -174,5 +186,35 @@ namespace funu
 	TriMesh::FaceHandle const& TriMesh::adhereto_face(HalfedgeHandle heh) const
 	{
 		return halfedges_conn_[heh].adt_fh;
+	}
+
+	inline 
+	TriMesh::VertexHandle& TriMesh::to_vertex(HalfedgeHandle heh)
+	{
+		return halfedges_conn_[heh].to_vh;
+	}
+
+	inline 
+	TriMesh::VertexHandle const& TriMesh::to_vertex(HalfedgeHandle heh) const
+	{
+		return halfedges_conn_[heh].to_vh;
+	}
+
+	inline
+	TriMesh::HalfedgeHandle TriMesh::opp_hedge(HalfedgeHandle heh) const
+	{
+		return (heh & 1) ? (heh - 1) : (heh + 1);
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle TriMesh::ccw_rotated_hedge(HalfedgeHandle heh) const
+	{
+		return opp_hedge(halfedges_conn_[heh].prev_heh);
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle TriMesh::cw_rotated_hedge(HalfedgeHandle heh) const
+	{
+		return 0;
 	}
 }
