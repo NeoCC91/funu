@@ -69,15 +69,14 @@ namespace funu
 		//点量
 		size_t v_n() const;
 		//出半边
-		HalfedgeHandle& outgoing_hedge(VertexHandle vh);
-		HalfedgeHandle const& outgoing_hedge(VertexHandle vh) const;
+		HalfedgeHandle outgoing_hedge(VertexHandle vh) const;
 		//获取坐标数据
 		Vec4& point(VertexHandle vh);
 		Vec4 const& point(VertexHandle vh) const;
 		//孤立点
 		bool is_isolated(VertexHandle vh) const;
 		//边界点
-		bool is_boundary(VertexHandle vh) const;
+		bool is_boundary_vertex(VertexHandle vh) const;
 		//非流型点
 		bool is_manifold(VertexHandle vh) const;
 		//加点
@@ -89,8 +88,7 @@ namespace funu
 		//面量
 		size_t f_n() const;
 		//包含的半边
-		HalfedgeHandle& inner_hedge(FaceHandle fh);
-		HalfedgeHandle const& inner_hedge(FaceHandle fh) const;
+		HalfedgeHandle inner_hedge(FaceHandle fh) const;
 
 		//添加面片
 		bool add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2);
@@ -103,24 +101,21 @@ namespace funu
 		//边量
 		size_t e_n() const;
 		//下一条半边
-		HalfedgeHandle& next_hedge(HalfedgeHandle heh);
-		HalfedgeHandle const& next_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle next_hedge(HalfedgeHandle heh) const;
 		//上一条半边
-		HalfedgeHandle& prev_hedge(HalfedgeHandle heh);
-		HalfedgeHandle const& prev_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle prev_hedge(HalfedgeHandle heh) const;
 		//所属面片
-		FaceHandle& adhereto_face(HalfedgeHandle heh);
-		FaceHandle const& adhereto_face(HalfedgeHandle heh) const;
+		FaceHandle adhereto_face(HalfedgeHandle heh) const;
 		//指向顶点
-		VertexHandle& to_vertex(HalfedgeHandle heh);
-		VertexHandle const& to_vertex(HalfedgeHandle heh) const;
+		VertexHandle to_vertex(HalfedgeHandle heh) const;
 		//反向半边
 		HalfedgeHandle opp_hedge(HalfedgeHandle heh) const;
 		HalfedgeHandle ccw_rotated_hedge(HalfedgeHandle heh) const;
 		HalfedgeHandle cw_rotated_hedge(HalfedgeHandle heh) const;
+		//边界半边
+		bool is_boundary_hedge(HalfedgeHandle heh) const;
 
-		//顶点出边访问器
-		friend class VOheCirculator;
+
 
 	private:
 		//内部api
@@ -140,35 +135,46 @@ namespace funu
 		std::vector<bool> halfedges_deleted_;
 	};
 
-	//访问器
+	//顶点出边访问器
 	class VOheCirculator
 	{
 	public:
-		VOheCirculator(TriMesh const* mesh, TriMesh::VertexHandle vh): mesh_{mesh}, start_vh_{vh},
-		                                                      outg_heh_{mesh_->verts_conn_[vh].outg_heh}
+		VOheCirculator(TriMesh const* mesh, TriMesh::VertexHandle vh): mesh_{mesh},
+		                                                               start_heh_{mesh_->outgoing_hedge(vh)},
+		                                                               curr_heh_{start_heh_}, rotate_count_{}
 		{
 		}
 
 		TriMesh::HalfedgeHandle operator*() const
 		{
-			return outg_heh_;
+			return curr_heh_;
 		}
 
 		//ccw
-		void operator++()
+		VOheCirculator& operator++()
 		{
-			
+			curr_heh_ = mesh_->ccw_rotated_hedge(curr_heh_);
+			++rotate_count_;
+			return *this;
 		}
 
 		//cw
-		void operator--()
+		VOheCirculator& operator--()
 		{
-			
+			curr_heh_ = mesh_->cw_rotated_hedge(curr_heh_);
+			--rotate_count_;
+			return *this;
+		}
+
+		bool is_valid() const
+		{
+			return curr_heh_ != start_heh_ || !rotate_count_; 
 		}
 
 	private:
 		TriMesh const* mesh_;
-		TriMesh::VertexHandle start_vh_;
-		TriMesh::HalfedgeHandle outg_heh_;
+		TriMesh::HalfedgeHandle start_heh_;
+		TriMesh::HalfedgeHandle curr_heh_;
+		int rotate_count_;
 	};
 }
