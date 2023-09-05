@@ -57,6 +57,21 @@ namespace funu
 	}
 
 	inline 
+	TriMesh::HalfedgeHandle TriMesh::find_hedge(VertexHandle vh0, VertexHandle vh1) const
+	{
+		HalfedgeHandle heh{INVALID_HANDLE};
+		for (auto vhehtor{VOheCirculator(this, vh0)}; vhehtor.is_valid(); ++vhehtor)
+		{
+			if (to_vertex(*vhehtor) == vh1)
+			{
+				heh = *vhehtor;
+				break;
+			}
+		}
+		return heh;
+	}
+
+	inline 
 	Vec4& TriMesh::point(VertexHandle vh)
 	{
 		return points_[vh];
@@ -125,8 +140,34 @@ namespace funu
 	inline 
 	bool TriMesh::add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2)
 	{
-		std::array input_verts{vh0,vh1,vh2,vh0};
-		return true;
+		if (is_boundary_vertex(vh0) && is_boundary_vertex(vh1) && is_boundary_vertex(vh2))
+		{
+			//std::array const input_verts{vh0, vh1, vh2, vh0};
+			std::array new_hehs{
+				find_hedge(vh0, vh1), find_hedge(vh1, vh2), find_hedge(vh2, vh0), INVALID_HANDLE
+			};
+			new_hehs[3] = new_hehs[0];
+			HalfedgeHandle one_side_prev, one_side_next, other_side_prev, other_side_next, boundary_prev, boundary_next;
+			for (int i = 0; i < 3; ++i)
+			{
+				if (new_hehs[i] != INVALID_HANDLE && new_hehs[i + 1] != INVALID_HANDLE &&
+					next_hedge(new_hehs[i]) != new_hehs[i + 1])
+				{
+					auto iter_heh{opp_hedge(new_hehs[i])};
+					while (is_boundary_hedge(iter_heh) == false)
+					{
+						iter_heh = ccw_rotated_hedge(iter_heh);
+					}
+					if (iter_heh == new_hehs[i + 1])
+					{
+						return false;
+					}
+
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	inline 

@@ -70,6 +70,7 @@ namespace funu
 		size_t v_n() const;
 		//出半边
 		HalfedgeHandle outgoing_hedge(VertexHandle vh) const;
+		HalfedgeHandle find_hedge(VertexHandle vh0, VertexHandle vh1) const;
 		//获取坐标数据
 		Vec4& point(VertexHandle vh);
 		Vec4 const& point(VertexHandle vh) const;
