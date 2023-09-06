@@ -159,12 +159,11 @@ namespace funu
 					{
 						iter_heh = ccw_rotated_hedge(iter_heh);
 					}
-					//非流型点只能是边界点
+					//非流型点只接受边界点的情况
 					if (iter_heh == new_hehs[i + 1])
 					{
 						return false;
 					}
-
 				}
 			}
 			return true;
