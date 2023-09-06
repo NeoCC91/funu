@@ -116,8 +116,6 @@ namespace funu
 		//边界半边
 		bool is_boundary_hedge(HalfedgeHandle heh) const;
 
-
-
 	private:
 		//内部api
 
@@ -136,23 +134,18 @@ namespace funu
 		std::vector<bool> halfedges_deleted_;
 	};
 
-	//顶点出边访问器
-	class VOheCirculator
+	//顶点拓扑关系访问器
+	class VCirculator
 	{
 	public:
-		VOheCirculator(TriMesh const* mesh, TriMesh::VertexHandle vh): mesh_{mesh},
+		VCirculator(TriMesh const* mesh, TriMesh::VertexHandle vh): mesh_{mesh},
 		                                                               start_heh_{mesh_->outgoing_hedge(vh)},
 		                                                               curr_heh_{start_heh_}, rotate_count_{}
 		{
 		}
 
-		TriMesh::HalfedgeHandle operator*() const
-		{
-			return curr_heh_;
-		}
-
 		//ccw
-		VOheCirculator& operator++()
+		VCirculator& operator++()
 		{
 			curr_heh_ = mesh_->ccw_rotated_hedge(curr_heh_);
 			++rotate_count_;
@@ -160,7 +153,7 @@ namespace funu
 		}
 
 		//cw
-		VOheCirculator& operator--()
+		VCirculator& operator--()
 		{
 			curr_heh_ = mesh_->cw_rotated_hedge(curr_heh_);
 			--rotate_count_;
@@ -170,6 +163,16 @@ namespace funu
 		bool is_valid() const
 		{
 			return curr_heh_ != start_heh_ || !rotate_count_; 
+		}
+
+		TriMesh::HalfedgeHandle heh() const
+		{
+			return curr_heh_;
+		}
+
+		TriMesh::FaceHandle fh() const
+		{
+			return mesh_->adhereto_face(curr_heh_);
 		}
 
 	private:

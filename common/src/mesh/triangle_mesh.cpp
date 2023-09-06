@@ -60,11 +60,11 @@ namespace funu
 	TriMesh::HalfedgeHandle TriMesh::find_hedge(VertexHandle vh0, VertexHandle vh1) const
 	{
 		HalfedgeHandle heh{INVALID_HANDLE};
-		for (auto vhehtor{VOheCirculator(this, vh0)}; vhehtor.is_valid(); ++vhehtor)
+		for (auto viter{VCirculator(this, vh0)}; viter.is_valid(); ++viter)
 		{
-			if (to_vertex(*vhehtor) == vh1)
+			if (to_vertex(viter.heh()) == vh1)
 			{
-				heh = *vhehtor;
+				heh = viter.heh();
 				break;
 			}
 		}
@@ -99,9 +99,9 @@ namespace funu
 	bool TriMesh::is_manifold(VertexHandle vh) const
 	{
 		int outg_num{};
-		for (auto vhehtor{VOheCirculator(this, vh)}; vhehtor.is_valid(); ++vhehtor)
+		for (auto viter{VCirculator(this, vh)}; viter.is_valid(); ++viter)
 		{
-			if (is_boundary_hedge(*vhehtor))
+			if (is_boundary_hedge(viter.heh()))
 			{
 				++outg_num;
 			}
@@ -140,6 +140,7 @@ namespace funu
 	inline 
 	bool TriMesh::add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2)
 	{
+		//务必是边界点
 		if (is_boundary_vertex(vh0) && is_boundary_vertex(vh1) && is_boundary_vertex(vh2))
 		{
 			//std::array const input_verts{vh0, vh1, vh2, vh0};
@@ -158,6 +159,7 @@ namespace funu
 					{
 						iter_heh = ccw_rotated_hedge(iter_heh);
 					}
+					//非流型点只能是边界点
 					if (iter_heh == new_hehs[i + 1])
 					{
 						return false;
