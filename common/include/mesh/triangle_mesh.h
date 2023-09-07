@@ -69,8 +69,8 @@ namespace funu
 		//点量
 		size_t v_n() const;
 		//出半边
-		HalfedgeHandle outgoing_hedge(VertexHandle vh) const;
-		HalfedgeHandle find_hedge(VertexHandle vh0, VertexHandle vh1) const;
+		HalfedgeHandle outgoing_heh(VertexHandle vh) const;
+		HalfedgeHandle find_heh(VertexHandle vh0, VertexHandle vh1) const;
 		//获取坐标数据
 		Vec4& point(VertexHandle vh);
 		Vec4 const& point(VertexHandle vh) const;
@@ -89,7 +89,7 @@ namespace funu
 		//面量
 		size_t f_n() const;
 		//包含的半边
-		HalfedgeHandle inner_hedge(FaceHandle fh) const;
+		HalfedgeHandle inner_heh(FaceHandle fh) const;
 
 		//添加面片
 		bool add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2);
@@ -102,22 +102,28 @@ namespace funu
 		//边量
 		size_t e_n() const;
 		//下一条半边
-		HalfedgeHandle next_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle next_heh(HalfedgeHandle heh) const;
 		//上一条半边
-		HalfedgeHandle prev_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle prev_heh(HalfedgeHandle heh) const;
 		//所属面片
-		FaceHandle adhereto_face(HalfedgeHandle heh) const;
+		FaceHandle adhereto_fh(HalfedgeHandle heh) const;
 		//指向顶点
-		VertexHandle to_vertex(HalfedgeHandle heh) const;
+		VertexHandle to_vh(HalfedgeHandle heh) const;
 		//反向半边
-		HalfedgeHandle opp_hedge(HalfedgeHandle heh) const;
-		HalfedgeHandle ccw_rotated_hedge(HalfedgeHandle heh) const;
-		HalfedgeHandle cw_rotated_hedge(HalfedgeHandle heh) const;
+		HalfedgeHandle opp_heh(HalfedgeHandle heh) const;
+		HalfedgeHandle ccw_rotated_heh(HalfedgeHandle heh) const;
+		HalfedgeHandle cw_rotated_heh(HalfedgeHandle heh) const;
 		//边界半边
 		bool is_boundary_hedge(HalfedgeHandle heh) const;
 
 	private:
 		//内部api
+		//点
+		//...
+		//面
+		//...
+		//边
+		bool set_to_vh(HalfedgeHandle heh, VertexHandle vh);
 
 	private:
 		//拓扑结构
@@ -139,7 +145,7 @@ namespace funu
 	{
 	public:
 		VCirculator(TriMesh const* mesh, TriMesh::VertexHandle vh): mesh_{mesh},
-		                                                               start_heh_{mesh_->outgoing_hedge(vh)},
+		                                                               start_heh_{mesh_->outgoing_heh(vh)},
 		                                                               curr_heh_{start_heh_}, rotate_count_{}
 		{
 		}
@@ -147,7 +153,7 @@ namespace funu
 		//ccw
 		VCirculator& operator++()
 		{
-			curr_heh_ = mesh_->ccw_rotated_hedge(curr_heh_);
+			curr_heh_ = mesh_->ccw_rotated_heh(curr_heh_);
 			++rotate_count_;
 			return *this;
 		}
@@ -155,7 +161,7 @@ namespace funu
 		//cw
 		VCirculator& operator--()
 		{
-			curr_heh_ = mesh_->cw_rotated_hedge(curr_heh_);
+			curr_heh_ = mesh_->cw_rotated_heh(curr_heh_);
 			--rotate_count_;
 			return *this;
 		}
@@ -172,7 +178,7 @@ namespace funu
 
 		TriMesh::FaceHandle fh() const
 		{
-			return mesh_->adhereto_face(curr_heh_);
+			return mesh_->adhereto_fh(curr_heh_);
 		}
 
 	private:
