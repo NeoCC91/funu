@@ -123,6 +123,7 @@ namespace funu
 		//Ãæ
 		//...
 		//±ß
+		HalfedgeHandle new_edge(VertexHandle vh0,VertexHandle vh1);
 		bool set_to_vh(HalfedgeHandle heh, VertexHandle vh);
 
 	private:

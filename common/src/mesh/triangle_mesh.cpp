@@ -243,6 +243,16 @@ namespace funu
 	}
 
 	inline 
+	TriMesh::HalfedgeHandle TriMesh::new_edge(VertexHandle vh0, VertexHandle vh1)
+	{
+		halfedges_conn_.emplace_back();
+		halfedges_conn_.back().to_vh = vh1;
+		halfedges_conn_.emplace_back();
+		halfedges_conn_.back().to_vh = vh0;
+		return static_cast<HalfedgeHandle>(he_n() - 2);
+	}
+
+	inline 
 	bool TriMesh::set_to_vh(HalfedgeHandle heh, VertexHandle vh)
 	{
 		halfedges_conn_[heh].to_vh = vh;
