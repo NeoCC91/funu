@@ -53,7 +53,7 @@ namespace funu
 	inline
 	TriMesh::HalfedgeHandle TriMesh::outgoing_heh(VertexHandle vh) const
 	{
-		return verts_conn_[vh].outg_heh;
+		return verts_conn_[vh].outg_heh_;
 	}
 
 	inline 
@@ -84,7 +84,7 @@ namespace funu
 	}
 
 	inline 
-	bool TriMesh::is_isolated(VertexHandle vh) const
+	bool TriMesh::is_isolated_vertex(VertexHandle vh) const
 	{
 		return outgoing_heh(vh) == INVALID_HANDLE;
 	}
@@ -92,7 +92,7 @@ namespace funu
 	inline 
 	bool TriMesh::is_boundary_vertex(VertexHandle vh) const
 	{
-		return is_isolated(vh) || is_boundary_hedge(outgoing_heh(vh));
+		return is_isolated_vertex(vh) || is_boundary_hedge(outgoing_heh(vh));
 	}
 
 	inline 
@@ -134,7 +134,7 @@ namespace funu
 	inline
 	TriMesh::HalfedgeHandle TriMesh::inner_heh(FaceHandle fh) const
 	{
-		return faces_conn_[fh].inner_heh;
+		return faces_conn_[fh].inner_heh_;
 	}
 
 	inline 
@@ -143,12 +143,22 @@ namespace funu
 		//务必是边界点
 		if (is_boundary_vertex(vh0) && is_boundary_vertex(vh1) && is_boundary_vertex(vh2))
 		{
+			std::array const key_vhs{vh0, vh1, vh2, vh0};
 			std::array key_hehs{
 				find_heh(vh0, vh1), find_heh(vh1, vh2), find_heh(vh2, vh0), INVALID_HANDLE
 			};
+			for (int i = 0; i < 3; ++i)
+			{
+				if (key_hehs[i] != INVALID_HANDLE && !is_boundary_hedge(key_hehs[i]))
+				{
+					return false;
+				}
+			}
 			key_hehs[3] = key_hehs[0];
 			std::array<std::pair<HalfedgeHandle, HalfedgeHandle>, 18> hehpair_cache;
 			int cache_count{};
+
+			/*
 			for (int i = 0; i < 3; ++i)
 			{
 				if (key_hehs[i] != INVALID_HANDLE && key_hehs[i + 1] != INVALID_HANDLE &&
@@ -169,6 +179,45 @@ namespace funu
 					hehpair_cache[cache_count++] = {key_hehs[i], key_hehs[i + 1]};
 				}
 			}
+			*/
+
+			auto const lastHeh{static_cast<HalfedgeHandle>(he_n()-1)};
+			for (int i = 0; i < 3; ++i)
+			{
+				if (key_hehs[i] == INVALID_HANDLE)
+				{
+					key_hehs[i] = new_edge(key_vhs[i], key_vhs[i + 1]);
+				}
+			}
+			key_hehs[3] = key_hehs[0];
+			faces_conn_.emplace_back();
+			set_inner_heh(static_cast<FaceHandle>(f_n()-1),key_hehs[0]);
+
+			for (int i = 0; i < 3; ++i)
+			{
+				auto const joint_vh{key_vhs[i + 1]};
+				int case_id{};
+				if (key_hehs[i] > lastHeh)
+				{
+					case_id |= 1;
+				}
+				if (key_hehs[i + 1] > lastHeh)
+				{
+					case_id |= 2;
+				}
+				switch (case_id)
+				{
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				default:
+					break;
+				}
+			}
+
 
 			return true;
 		}
@@ -197,25 +246,25 @@ namespace funu
 	inline
 	TriMesh::HalfedgeHandle TriMesh::next_heh(HalfedgeHandle heh) const
 	{
-		return halfedges_conn_[heh].next_heh;
+		return halfedges_conn_[heh].next_heh_;
 	}
 	
 	inline
 	TriMesh::HalfedgeHandle TriMesh::prev_heh(HalfedgeHandle heh) const
 	{
-		return halfedges_conn_[heh].prev_heh;
+		return halfedges_conn_[heh].prev_heh_;
 	}
 	
 	inline
 	TriMesh::FaceHandle TriMesh::adhereto_fh(HalfedgeHandle heh) const
 	{
-		return halfedges_conn_[heh].adt_fh;
+		return halfedges_conn_[heh].adt_fh_;
 	}
 
 	inline
 	TriMesh::VertexHandle TriMesh::to_vh(HalfedgeHandle heh) const
 	{
-		return halfedges_conn_[heh].to_vh;
+		return halfedges_conn_[heh].to_vh_;
 	}
 
 	inline
@@ -243,19 +292,27 @@ namespace funu
 	}
 
 	inline 
+	bool TriMesh::set_inner_heh(FaceHandle fh, HalfedgeHandle heh)
+	{
+		faces_conn_[fh].inner_heh_ = heh;
+		return true;
+	}
+
+	inline 
 	TriMesh::HalfedgeHandle TriMesh::new_edge(VertexHandle vh0, VertexHandle vh1)
 	{
+		auto const he_count{static_cast<HalfedgeHandle>(he_n())};
 		halfedges_conn_.emplace_back();
-		halfedges_conn_.back().to_vh = vh1;
+		set_to_vh(he_count, vh1);
 		halfedges_conn_.emplace_back();
-		halfedges_conn_.back().to_vh = vh0;
-		return static_cast<HalfedgeHandle>(he_n() - 2);
+		set_to_vh(he_count + 1, vh0);
+		return he_count;
 	}
 
 	inline 
 	bool TriMesh::set_to_vh(HalfedgeHandle heh, VertexHandle vh)
 	{
-		halfedges_conn_[heh].to_vh = vh;
+		halfedges_conn_[heh].to_vh_ = vh;
 		return true;
 	}
 }

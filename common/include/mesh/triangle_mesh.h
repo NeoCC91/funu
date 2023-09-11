@@ -32,35 +32,35 @@ namespace funu
 		//拓扑结构
 		struct HalfEdge
 		{
-			HalfEdge(): next_heh{INVALID_HANDLE}, prev_heh{INVALID_HANDLE}, adt_fh{INVALID_HANDLE}, to_vh{INVALID_HANDLE}
+			HalfEdge(): next_heh_{INVALID_HANDLE}, prev_heh_{INVALID_HANDLE}, adt_fh_{INVALID_HANDLE}, to_vh_{INVALID_HANDLE}
 			{
 			}
 			//上一个半边
-			HalfedgeHandle next_heh;
+			HalfedgeHandle next_heh_;
 			//下一个半边
-			HalfedgeHandle prev_heh;
+			HalfedgeHandle prev_heh_;
 			//所属面片
-			FaceHandle adt_fh;
+			FaceHandle adt_fh_;
 			//指向的顶点
-			VertexHandle to_vh;
+			VertexHandle to_vh_;
 		};
 
 		struct Vertex
 		{
-			Vertex(): outg_heh{INVALID_HANDLE}
+			Vertex(): outg_heh_{INVALID_HANDLE}
 			{
 			}
 			//顶点出发的半边(边界点时，出边为某个边界半边)
-			HalfedgeHandle outg_heh;
+			HalfedgeHandle outg_heh_;
 		};
 
 		struct Face
 		{
-			Face(): inner_heh{INVALID_HANDLE}
+			Face(): inner_heh_{INVALID_HANDLE}
 			{
 			}
 			//面片所含半边
-			HalfedgeHandle inner_heh;
+			HalfedgeHandle inner_heh_;
 		};
 
 	public:
@@ -75,7 +75,7 @@ namespace funu
 		Vec4& point(VertexHandle vh);
 		Vec4 const& point(VertexHandle vh) const;
 		//孤立点
-		bool is_isolated(VertexHandle vh) const;
+		bool is_isolated_vertex(VertexHandle vh) const;
 		//边界点
 		bool is_boundary_vertex(VertexHandle vh) const;
 		//非流型点
@@ -121,6 +121,7 @@ namespace funu
 		//点
 		//...
 		//面
+		bool set_inner_heh(FaceHandle fh,HalfedgeHandle heh);
 		//...
 		//边
 		HalfedgeHandle new_edge(VertexHandle vh0,VertexHandle vh1);
