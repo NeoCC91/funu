@@ -8,7 +8,7 @@
 namespace funu
 {
 	//三角网格
-	class FUNU_API TriMesh
+	class TriMesh
 	{
 	public:
 		TriMesh();
@@ -81,9 +81,9 @@ namespace funu
 		//非流型点
 		bool is_manifold(VertexHandle vh) const;
 		//加点
-		bool add_vertex(Vec4 const& pnt);
+		void add_vertex(Vec4 const& pnt);
 		//删点
-		bool remove_vertex(VertexHandle vh);
+		void remove_vertex(VertexHandle vh);
 
 		//面片操作
 		//面量
@@ -92,9 +92,9 @@ namespace funu
 		HalfedgeHandle inner_heh(FaceHandle fh) const;
 
 		//添加面片
-		bool add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2);
+		FaceHandle add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2);
 		//删除面片
-		bool remove_face(FaceHandle fh);
+		void remove_face(FaceHandle fh);
 
 		//半边操作
 		//半边量
@@ -117,17 +117,20 @@ namespace funu
 		bool is_boundary_hedge(HalfedgeHandle heh) const;
 
 	private:
-		//内部api
+		//内部数据
 		//点
-		//...
+		void set_outg_heh(VertexHandle vh, HalfedgeHandle heh);
+		
 		//面
-		bool set_inner_heh(FaceHandle fh,HalfedgeHandle heh);
-		//...
+		void set_inner_heh(FaceHandle fh,HalfedgeHandle heh);
+		
 		//边
 		HalfedgeHandle new_edge(VertexHandle vh0,VertexHandle vh1);
-		bool set_to_vh(HalfedgeHandle heh, VertexHandle vh);
+		void set_to_vh(HalfedgeHandle heh, VertexHandle vh);
+		void set_adt_fh(HalfedgeHandle heh, FaceHandle fh);
+		void set_next_heh(HalfedgeHandle heh0, HalfedgeHandle heh1);
+		void set_prev_heh(HalfedgeHandle heh0, HalfedgeHandle heh1);
 
-	private:
 		//拓扑结构
 		std::vector<Vertex> verts_conn_;
 		std::vector<Face> faces_conn_;
