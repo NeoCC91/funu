@@ -111,8 +111,12 @@ namespace funu
 		VertexHandle to_vh(HalfedgeHandle heh) const;
 		//反向半边
 		HalfedgeHandle opp_heh(HalfedgeHandle heh) const;
-		HalfedgeHandle ccw_rotated_heh(HalfedgeHandle heh) const;
-		HalfedgeHandle cw_rotated_heh(HalfedgeHandle heh) const;
+		//outgoing heh
+		HalfedgeHandle ccw_rotated_oheh(HalfedgeHandle heh) const;
+		HalfedgeHandle cw_rotated_oheh(HalfedgeHandle heh) const;
+		//incoming heh
+		HalfedgeHandle ccw_rotated_iheh(HalfedgeHandle heh) const;
+		HalfedgeHandle cw_rotated_iheh(HalfedgeHandle heh) const;
 		//边界半边
 		bool is_boundary_hedge(HalfedgeHandle heh) const;
 
@@ -130,6 +134,7 @@ namespace funu
 		void set_adt_fh(HalfedgeHandle heh, FaceHandle fh);
 		void set_next_heh(HalfedgeHandle heh0, HalfedgeHandle heh1);
 		void set_prev_heh(HalfedgeHandle heh0, HalfedgeHandle heh1);
+		void link_hehs(HalfedgeHandle heh0, HalfedgeHandle heh1);
 
 		//拓扑结构
 		std::vector<Vertex> verts_conn_;
@@ -139,10 +144,10 @@ namespace funu
 		//位置数据 x,y,z,w
 		std::vector<Vec4> points_;
 
-		//标记数据
-		std::vector<bool> verts_deleted_;
-		std::vector<bool> faces_deleted_;
-		std::vector<bool> halfedges_deleted_;
+		//删除标记数据
+		std::vector<int> verts_removed_;
+		std::vector<int> faces_removed_;
+		std::vector<int> halfedges_removed_;
 	};
 
 	//顶点拓扑关系访问器
@@ -158,7 +163,7 @@ namespace funu
 		//ccw
 		VCirculator& operator++()
 		{
-			curr_heh_ = mesh_->ccw_rotated_heh(curr_heh_);
+			curr_heh_ = mesh_->ccw_rotated_oheh(curr_heh_);
 			++rotate_count_;
 			return *this;
 		}
@@ -166,7 +171,7 @@ namespace funu
 		//cw
 		VCirculator& operator--()
 		{
-			curr_heh_ = mesh_->cw_rotated_heh(curr_heh_);
+			curr_heh_ = mesh_->cw_rotated_oheh(curr_heh_);
 			--rotate_count_;
 			return *this;
 		}
@@ -176,18 +181,95 @@ namespace funu
 			return curr_heh_ != start_heh_ || !rotate_count_; 
 		}
 
-		TriMesh::HalfedgeHandle heh() const
+		//outgoing heh
+		TriMesh::HalfedgeHandle oheh() const
 		{
 			return curr_heh_;
 		}
 
-		TriMesh::FaceHandle fh() const
+		//incoming heh
+		TriMesh::HalfedgeHandle iheh() const
 		{
-			return mesh_->adhereto_fh(curr_heh_);
+			return mesh_->opp_heh(curr_heh_);
+		}
+
+		TriMesh::FaceHandle vh() const
+		{
+			return mesh_->to_vh(curr_heh_);
 		}
 
 	private:
 		TriMesh const* mesh_;
+		TriMesh::HalfedgeHandle start_heh_;
+		TriMesh::HalfedgeHandle curr_heh_;
+		int rotate_count_;
+	};
+
+	//面片拓扑关系访问器
+	class FCirculator
+	{
+	public:
+		FCirculator(TriMesh const* mesh, TriMesh::FaceHandle fh): mesh_{mesh}, prev_inner_heh_{mesh_->inner_heh(fh)},
+		                                                          next_inner_heh_{mesh_->next_heh(prev_inner_heh_)},
+		                                                          start_heh_{find_target_oheh(prev_inner_heh_)},
+		                                                          curr_heh_{start_heh_}, rotate_count_{}
+		{
+		}
+
+		//ccw
+		FCirculator& operator++()
+		{
+			auto const heh = mesh_->ccw_rotated_oheh(curr_heh_);
+			if (heh == next_inner_heh_)
+			{
+				prev_inner_heh_ = next_inner_heh_;
+				next_inner_heh_ = mesh_->next_heh(next_inner_heh_);
+				curr_heh_ = find_target_oheh(prev_inner_heh_);
+			}
+			++rotate_count_;
+			return *this;
+		}
+
+		//cw
+		FCirculator& operator--()
+		{
+			auto const heh = mesh_->cw_rotated_oheh(curr_heh_);
+			if (heh == mesh_->opp_heh(prev_inner_heh_))
+			{
+				next_inner_heh_ = prev_inner_heh_;
+				prev_inner_heh_ = mesh_->prev_heh(prev_inner_heh_);
+				curr_heh_ = mesh_->next_heh(heh);
+			}
+			--rotate_count_;
+			return *this;
+		}
+
+		bool is_valid() const
+		{
+			return curr_heh_ != start_heh_ || !rotate_count_;
+		}
+
+		//outgoing heh
+		TriMesh::HalfedgeHandle oheh() const
+		{
+			return curr_heh_;
+		}
+
+		//incoming heh
+		TriMesh::HalfedgeHandle iheh() const
+		{
+			return mesh_->opp_heh(curr_heh_);
+		}
+
+	private:
+		TriMesh::HalfedgeHandle find_target_oheh(TriMesh::HalfedgeHandle inner_heh) const
+		{
+			return mesh_->ccw_rotated_oheh(mesh_->opp_heh(inner_heh));
+		}
+
+		TriMesh const* mesh_;
+		TriMesh::HalfedgeHandle prev_inner_heh_;
+		TriMesh::HalfedgeHandle next_inner_heh_;
 		TriMesh::HalfedgeHandle start_heh_;
 		TriMesh::HalfedgeHandle curr_heh_;
 		int rotate_count_;

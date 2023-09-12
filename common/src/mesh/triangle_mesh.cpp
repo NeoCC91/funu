@@ -62,9 +62,9 @@ namespace funu
 		HalfedgeHandle heh{INVALID_HANDLE};
 		for (auto viter{VCirculator(this, vh0)}; viter.is_valid(); ++viter)
 		{
-			if (to_vh(viter.heh()) == vh1)
+			if (to_vh(viter.oheh()) == vh1)
 			{
-				heh = viter.heh();
+				heh = viter.oheh();
 				break;
 			}
 		}
@@ -101,7 +101,7 @@ namespace funu
 		int outg_num{};
 		for (auto viter{VCirculator(this, vh)}; viter.is_valid(); ++viter)
 		{
-			if (is_boundary_hedge(viter.heh()))
+			if (is_boundary_hedge(viter.oheh()))
 			{
 				++outg_num;
 			}
@@ -114,13 +114,13 @@ namespace funu
 	{
 		verts_conn_.emplace_back();
 		points_.push_back(pnt);
-		verts_deleted_.push_back({});
+		verts_removed_.push_back(0);
 	}
 
 	inline 
 	void TriMesh::remove_vertex(VertexHandle vh)
 	{
-		verts_deleted_[vh] = true;
+		verts_removed_[vh] = 1;
 	}
 
 	inline 
@@ -153,10 +153,7 @@ namespace funu
 				}
 			}
 			key_hehs[3] = key_hehs[0];
-			std::array<std::pair<HalfedgeHandle, HalfedgeHandle>, 18> hehpair_cache;
-			int cache_count{};
 
-			/*
 			for (int i = 0; i < 3; ++i)
 			{
 				if (key_hehs[i] != INVALID_HANDLE && key_hehs[i + 1] != INVALID_HANDLE &&
@@ -165,21 +162,20 @@ namespace funu
 					auto iter_heh{opp_heh(key_hehs[i])};
 					while (is_boundary_hedge(iter_heh) == false)
 					{
-						iter_heh = ccw_rotated_heh(iter_heh);
+						iter_heh = ccw_rotated_oheh(iter_heh);
 					}
 					//非流型点只接受边界点的情况
 					if (iter_heh == key_hehs[i + 1])
 					{
 						return INVALID_HANDLE;
 					}
-					hehpair_cache[cache_count++] = {prev_heh(iter_heh), next_heh(key_hehs[i])};
-					hehpair_cache[cache_count++] = {prev_heh(key_hehs[i + 1]), iter_heh};
-					hehpair_cache[cache_count++] = {key_hehs[i], key_hehs[i + 1]};
+					link_hehs(prev_heh(iter_heh), next_heh(key_hehs[i]));
+					link_hehs(prev_heh(key_hehs[i + 1]), iter_heh);
+					link_hehs(key_hehs[i], key_hehs[i + 1]);
 				}
 			}
-			*/
 
-			auto const lastHeh{static_cast<HalfedgeHandle>(he_n()-1)};
+			auto const lastHeh{static_cast<HalfedgeHandle>(he_n() - 1)};
 			for (int i = 0; i < 3; ++i)
 			{
 				if (key_hehs[i] == INVALID_HANDLE)
@@ -191,8 +187,9 @@ namespace funu
 
 			//加入面片
 			faces_conn_.emplace_back();
-			FaceHandle const curr_fh{static_cast<FaceHandle>(f_n()-1)};
-			set_inner_heh(curr_fh,key_hehs[0]);
+			faces_removed_.push_back(0);
+			FaceHandle const curr_fh{static_cast<FaceHandle>(f_n() - 1)};
+			set_inner_heh(curr_fh, key_hehs[0]);
 
 			//设置外围半边的拓扑数据
 			for (int i = 0; i < 3; ++i)
@@ -220,9 +217,9 @@ namespace funu
 					{
 						for (auto viter{VCirculator(this, joint_vh)}; viter.is_valid(); ++viter)
 						{
-							if (is_boundary_hedge(viter.heh()))
+							if (is_boundary_hedge(viter.oheh()))
 							{
-								set_outg_heh(joint_vh, viter.heh());
+								set_outg_heh(joint_vh, viter.oheh());
 								break;
 							}
 						}
@@ -231,13 +228,13 @@ namespace funu
 				case 1:
 					// 新-->旧
 					boundary_prev = prev_heh(key_hehs[i + 1]);
-					hehpair_cache[cache_count++] = {boundary_prev, outer_next};
+					link_hehs(boundary_prev, outer_next);
 					set_outg_heh(joint_vh, outer_next);
 					break;
 				case 2:
 					// 旧-->新
 					boundary_next = next_heh(key_hehs[i]);
-					hehpair_cache[cache_count++] = {outer_prev, boundary_next};
+					link_hehs(outer_prev, boundary_next);
 					set_outg_heh(joint_vh, boundary_next);
 					break;
 				case 3:
@@ -246,15 +243,15 @@ namespace funu
 					if (is_isolated_vertex(joint_vh))
 					{
 						set_outg_heh(joint_vh, outer_next);
-						hehpair_cache[cache_count++] = {outer_prev, outer_next};
+						link_hehs(outer_prev, outer_next);
 					}
 					//非孤立点
 					else
 					{
 						boundary_next = outgoing_heh(joint_vh);
 						boundary_prev = prev_heh(boundary_next);
-						hehpair_cache[cache_count++] = {outer_prev, boundary_next};
-						hehpair_cache[cache_count++] = {boundary_prev, outer_next};
+						link_hehs(outer_prev, boundary_next);
+						link_hehs(boundary_prev, outer_next);
 					}
 					break;
 				default:
@@ -262,16 +259,10 @@ namespace funu
 				}
 				if (case_id)
 				{
-					hehpair_cache[cache_count++] = {key_hehs[i], key_hehs[i + 1]};
+					link_hehs(key_hehs[i], key_hehs[i + 1]);
 				}
-
-				set_adt_fh(key_hehs[i],curr_fh);
+				set_adt_fh(key_hehs[i], curr_fh);
 			}
-			for (int i = 0; i < cache_count; ++i)
-			{
-				
-			}
-
 			return curr_fh;
 		}
 		return INVALID_HANDLE;
@@ -280,7 +271,7 @@ namespace funu
 	inline 
 	void TriMesh::remove_face(FaceHandle fh)
 	{
-		faces_deleted_[fh] = true;
+		faces_removed_[fh] = true;
 	}
 
 	inline 
@@ -326,15 +317,27 @@ namespace funu
 	}
 
 	inline 
-	TriMesh::HalfedgeHandle TriMesh::ccw_rotated_heh(HalfedgeHandle heh) const
+	TriMesh::HalfedgeHandle TriMesh::ccw_rotated_oheh(HalfedgeHandle heh) const
 	{
 		return opp_heh(prev_heh(heh));
 	}
 
 	inline 
-	TriMesh::HalfedgeHandle TriMesh::cw_rotated_heh(HalfedgeHandle heh) const
+	TriMesh::HalfedgeHandle TriMesh::cw_rotated_oheh(HalfedgeHandle heh) const
 	{
 		return next_heh(opp_heh(heh));
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle TriMesh::ccw_rotated_iheh(HalfedgeHandle heh) const
+	{
+		return prev_heh(opp_heh(heh));
+	}
+
+	inline 
+	TriMesh::HalfedgeHandle TriMesh::cw_rotated_iheh(HalfedgeHandle heh) const
+	{
+		return opp_heh(next_heh(heh));
 	}
 
 	inline 
@@ -388,5 +391,12 @@ namespace funu
 	void TriMesh::set_prev_heh(HalfedgeHandle heh0, HalfedgeHandle heh1)
 	{
 		halfedges_conn_[heh0].prev_heh_ = heh1;
+	}
+
+	inline 
+	void TriMesh::link_hehs(HalfedgeHandle heh0, HalfedgeHandle heh1)
+	{
+		set_next_heh(heh0,heh1);
+		set_prev_heh(heh1,heh0);
 	}
 }
