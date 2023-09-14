@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../core/config.h"
-#include "../core/types.h"
 #include <cstdint>
 #include <vector>
+#include "types.h"
 
 namespace funu
 {

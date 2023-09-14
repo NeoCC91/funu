@@ -1,4 +1,4 @@
-#include "mesh/triangle_mesh.h"
+#include <core/triangle_mesh.h>
 #include <array>
 
 namespace funu
