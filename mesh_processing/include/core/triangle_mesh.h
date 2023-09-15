@@ -218,8 +218,8 @@ namespace funu
 		//ccw
 		FCirculator& operator++()
 		{
-			auto const heh = mesh_->ccw_rotated_oheh(curr_heh_);
-			if (heh == next_inner_heh_)
+			curr_heh_ = mesh_->ccw_rotated_oheh(curr_heh_);
+			if (curr_heh_ == next_inner_heh_)
 			{
 				prev_inner_heh_ = next_inner_heh_;
 				next_inner_heh_ = mesh_->next_heh(next_inner_heh_);
@@ -232,12 +232,12 @@ namespace funu
 		//cw
 		FCirculator& operator--()
 		{
-			auto const heh = mesh_->cw_rotated_oheh(curr_heh_);
-			if (heh == mesh_->opp_heh(prev_inner_heh_))
+			curr_heh_ = mesh_->cw_rotated_oheh(curr_heh_);
+			if (curr_heh_ == mesh_->opp_heh(prev_inner_heh_))
 			{
 				next_inner_heh_ = prev_inner_heh_;
 				prev_inner_heh_ = mesh_->prev_heh(prev_inner_heh_);
-				curr_heh_ = mesh_->next_heh(heh);
+				curr_heh_ = mesh_->next_heh(curr_heh_);
 			}
 			--rotate_count_;
 			return *this;

@@ -271,7 +271,7 @@ namespace funu
 	inline 
 	void TriMesh::remove_face(FaceHandle fh)
 	{
-		faces_removed_[fh] = true;
+		faces_removed_[fh] = 1;
 	}
 
 	inline 
