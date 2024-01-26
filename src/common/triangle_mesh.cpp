@@ -1,5 +1,5 @@
-#include <core/triangle_mesh.h>
 #include <array>
+#include <common/triangle_mesh.h>
 
 namespace funu
 {
