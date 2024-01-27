@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include "types.h"
+#include <Eigen/Dense>
 
 namespace funu
 {
@@ -17,6 +17,9 @@ namespace funu
 
 		TriMesh& operator=(TriMesh const& rhs);
 		TriMesh& operator=(TriMesh&& rhs) noexcept;
+
+		using Point=Eigen::Vector4f;
+		using Normal=Eigen::Vector4f;
 
 		struct TypeTraits
 		{
@@ -71,8 +74,8 @@ namespace funu
 		HalfedgeHandle outgoing_heh(VertexHandle vh) const;
 		HalfedgeHandle find_heh(VertexHandle vh0, VertexHandle vh1) const;
 		//获取坐标数据
-		Vec4& point(VertexHandle vh);
-		Vec4 const& point(VertexHandle vh) const;
+		Point& point(VertexHandle vh);
+		Point const& point(VertexHandle vh) const;
 		//孤立点
 		bool is_isolated_vertex(VertexHandle vh) const;
 		//边界点
@@ -80,7 +83,7 @@ namespace funu
 		//非流型点
 		bool is_manifold(VertexHandle vh) const;
 		//加点
-		void add_vertex(Vec4 const& pnt);
+		void add_vertex(Point const& pnt);
 		//删点
 		void remove_vertex(VertexHandle vh);
 
@@ -141,7 +144,7 @@ namespace funu
 		std::vector<HalfEdge> halfedges_conn_;
 
 		//位置数据 x,y,z,w
-		std::vector<Vec4> points_;
+		std::vector<Point> points_;
 
 		//删除标记数据
 		std::vector<int> verts_removed_;

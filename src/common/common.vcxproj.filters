@@ -18,9 +18,6 @@
     <ClInclude Include="..\..\common\triangle_mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="triangle_mesh.cpp">

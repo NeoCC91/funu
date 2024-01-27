@@ -72,13 +72,13 @@ namespace funu
 	}
 
 	inline 
-	Vec4& TriMesh::point(VertexHandle vh)
+	TriMesh::Point& TriMesh::point(VertexHandle vh)
 	{
 		return points_[vh];
 	}
 
 	inline 
-	Vec4 const& TriMesh::point(VertexHandle vh) const
+	TriMesh::Point const& TriMesh::point(VertexHandle vh) const
 	{
 		return points_[vh];
 	}
@@ -110,7 +110,7 @@ namespace funu
 	}
 
 	inline
-	void TriMesh::add_vertex(Vec4 const& pnt)
+	void TriMesh::add_vertex(Point const& pnt)
 	{
 		verts_conn_.emplace_back();
 		points_.push_back(pnt);

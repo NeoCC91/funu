@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\triangle_mesh.h" />
-    <ClInclude Include="..\..\common\types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="triangle_mesh.cpp" />
@@ -139,7 +138,7 @@
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(EIGEN_DIR);..\..\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\;$(EIGEN_DIR)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
