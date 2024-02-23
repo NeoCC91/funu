@@ -138,7 +138,7 @@
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>..\..\;$(EIGEN_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EIGEN_DIR)\include;..\..\</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
