@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <compare>
 #include <vector>
 #include <Eigen/Dense>
 
@@ -27,7 +27,7 @@ namespace funu
 			[[nodiscard]] int idx() const { return idx_; }
 			[[nodiscard]] explicit operator int() const { return idx(); }
 			[[nodiscard]] bool is_valid() const { return idx_ != -1; }
-			[[nodiscard]] std::partial_ordering operator<=>(Handle const& rhs) const = default;
+			[[nodiscard]] std::strong_ordering operator<=>(Handle const& rhs) const = default;
 
 		protected:
 			Handle() = default;
@@ -152,7 +152,7 @@ namespace funu
 		HalfedgeHandle ccw_incoming_heh(HalfedgeHandle heh) const;
 		HalfedgeHandle cw_incoming_heh(HalfedgeHandle heh) const;
 		//边界半边
-		bool is_boundary_hedge(HalfedgeHandle heh) const;
+		bool is_boundary_halfedge(HalfedgeHandle heh) const;
 
 	private:
 		//内部操作和数据
@@ -188,52 +188,24 @@ namespace funu
 	class VCirculator
 	{
 	public:
-		VCirculator(TriMesh const* mesh, TriMesh::VertexHandle vh): mesh_{mesh},
-		                                                            start_heh_{mesh_->outgoing_halfedge(vh)},
-		                                                            curr_heh_{start_heh_}, rotate_count_{}
-		{
-		}
+		VCirculator(TriMesh const& mesh, TriMesh::VertexHandle vh);
 
 		//ccw
-		VCirculator& operator++()
-		{
-			curr_heh_ = mesh_->ccw_outgoing_heh(curr_heh_);
-			++rotate_count_;
-			return *this;
-		}
+		VCirculator& operator++();
 
 		//cw
-		VCirculator& operator--()
-		{
-			curr_heh_ = mesh_->cw_outgoing_heh(curr_heh_);
-			--rotate_count_;
-			return *this;
-		}
+		VCirculator& operator--();
 
-		bool is_valid() const
-		{
-			return curr_heh_ != start_heh_ || !rotate_count_;
-		}
+		bool is_valid() const;
 
-		//outgoing heh
-		TriMesh::HalfedgeHandle oheh() const
-		{
-			return curr_heh_;
-		}
+		TriMesh::HalfedgeHandle outgoing_heh() const;
 
-		//incoming heh
-		TriMesh::HalfedgeHandle iheh() const
-		{
-			return mesh_->opposite_heh(curr_heh_);
-		}
+		TriMesh::HalfedgeHandle incoming_heh() const;
 
-		TriMesh::FaceHandle vh() const
-		{
-			return mesh_->to_vh(curr_heh_);
-		}
+		TriMesh::VertexHandle vh() const;
 
 	private:
-		TriMesh const* mesh_;
+		TriMesh const& mesh_;
 		TriMesh::HalfedgeHandle start_heh_;
 		TriMesh::HalfedgeHandle curr_heh_;
 		int rotate_count_;
@@ -243,65 +215,24 @@ namespace funu
 	class FCirculator
 	{
 	public:
-		FCirculator(TriMesh const* mesh, TriMesh::FaceHandle fh): mesh_{mesh}, prev_inner_heh_{mesh_->inner_heh(fh)},
-		                                                          next_inner_heh_{mesh_->next_heh(prev_inner_heh_)},
-		                                                          start_heh_{find_target_oheh(prev_inner_heh_)},
-		                                                          curr_heh_{start_heh_}, rotate_count_{}
-		{
-		}
+		FCirculator(TriMesh const& mesh, TriMesh::FaceHandle fh);
 
 		//ccw
-		FCirculator& operator++()
-		{
-			curr_heh_ = mesh_->ccw_outgoing_heh(curr_heh_);
-			if (curr_heh_ == next_inner_heh_)
-			{
-				prev_inner_heh_ = next_inner_heh_;
-				next_inner_heh_ = mesh_->next_heh(next_inner_heh_);
-				curr_heh_ = find_target_oheh(prev_inner_heh_);
-			}
-			++rotate_count_;
-			return *this;
-		}
+		FCirculator& operator++();
 
 		//cw
-		FCirculator& operator--()
-		{
-			curr_heh_ = mesh_->cw_outgoing_heh(curr_heh_);
-			if (curr_heh_ == mesh_->opposite_heh(prev_inner_heh_))
-			{
-				next_inner_heh_ = prev_inner_heh_;
-				prev_inner_heh_ = mesh_->prev_heh(prev_inner_heh_);
-				curr_heh_ = mesh_->next_heh(curr_heh_);
-			}
-			--rotate_count_;
-			return *this;
-		}
+		FCirculator& operator--();
 
-		bool is_valid() const
-		{
-			return curr_heh_ != start_heh_ || !rotate_count_;
-		}
+		bool is_valid() const;
 
-		//outgoing heh
-		TriMesh::HalfedgeHandle oheh() const
-		{
-			return curr_heh_;
-		}
+		TriMesh::HalfedgeHandle outgoing_heh() const;
 
-		//incoming heh
-		TriMesh::HalfedgeHandle iheh() const
-		{
-			return mesh_->opposite_heh(curr_heh_);
-		}
+		TriMesh::HalfedgeHandle incoming_heh() const;
 
 	private:
-		TriMesh::HalfedgeHandle find_target_oheh(TriMesh::HalfedgeHandle inner_heh) const
-		{
-			return mesh_->ccw_outgoing_heh(mesh_->opposite_heh(inner_heh));
-		}
+		TriMesh::HalfedgeHandle find_target_oheh(TriMesh::HalfedgeHandle inner_heh) const;
 
-		TriMesh const* mesh_;
+		TriMesh const& mesh_;
 		TriMesh::HalfedgeHandle prev_inner_heh_;
 		TriMesh::HalfedgeHandle next_inner_heh_;
 		TriMesh::HalfedgeHandle start_heh_;

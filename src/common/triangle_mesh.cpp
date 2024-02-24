@@ -57,11 +57,11 @@ namespace funu
 	inline TriMesh::HalfedgeHandle TriMesh::find_heh(VertexHandle vh0, VertexHandle vh1) const
 	{
 		HalfedgeHandle heh;
-		for (auto viter{VCirculator(this, vh0)}; viter.is_valid(); ++viter)
+		for (auto viter{VCirculator(*this, vh0)}; viter.is_valid(); ++viter)
 		{
-			if (to_vh(viter.oheh()) == vh1)
+			if (to_vh(viter.outgoing_heh()) == vh1)
 			{
-				heh = viter.oheh();
+				heh = viter.outgoing_heh();
 				break;
 			}
 		}
@@ -85,15 +85,15 @@ namespace funu
 
 	inline bool TriMesh::is_boundary_vertex(VertexHandle vh) const
 	{
-		return is_isolated_vertex(vh) || is_boundary_hedge(outgoing_halfedge(vh));
+		return is_isolated_vertex(vh) || is_boundary_halfedge(outgoing_halfedge(vh));
 	}
 
 	inline bool TriMesh::is_manifold(VertexHandle vh) const
 	{
 		int outg_num{};
-		for (auto viter{VCirculator(this, vh)}; viter.is_valid(); ++viter)
+		for (auto viter{VCirculator(*this, vh)}; viter.is_valid(); ++viter)
 		{
-			if (is_boundary_hedge(viter.oheh()))
+			if (is_boundary_halfedge(viter.outgoing_heh()))
 			{
 				++outg_num;
 			}
@@ -125,36 +125,36 @@ namespace funu
 
 	inline TriMesh::FaceHandle TriMesh::add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2)
 	{
-		//务必是边界点
+		//务必都是边界点
 		if (is_boundary_vertex(vh0) && is_boundary_vertex(vh1) && is_boundary_vertex(vh2))
 		{
 			std::array const key_vhs{vh0, vh1, vh2, vh0};
 			std::array key_hehs{
-				find_heh(vh0, vh1), find_heh(vh1, vh2), find_heh(vh2, vh0), INVALID_HANDLE
+				find_heh(vh0, vh1), find_heh(vh1, vh2), find_heh(vh2, vh0), HalfedgeHandle{}
 			};
 			for (int i = 0; i < 3; ++i)
 			{
-				if (key_hehs[i] != INVALID_HANDLE && !is_boundary_hedge(key_hehs[i]))
+				if (key_hehs[i].is_valid() && !is_boundary_halfedge(key_hehs[i]))
 				{
-					return INVALID_HANDLE;
+					return {};
 				}
 			}
 			key_hehs[3] = key_hehs[0];
 
 			for (int i = 0; i < 3; ++i)
 			{
-				if (key_hehs[i] != INVALID_HANDLE && key_hehs[i + 1] != INVALID_HANDLE &&
+				if (key_hehs[i].is_valid() && key_hehs[i + 1].is_valid() &&
 					next_heh(key_hehs[i]) != key_hehs[i + 1])
 				{
 					auto iter_heh{opposite_heh(key_hehs[i])};
-					while (is_boundary_hedge(iter_heh) == false)
+					while (is_boundary_halfedge(iter_heh) == false)
 					{
 						iter_heh = ccw_outgoing_heh(iter_heh);
 					}
 					//非流型点只接受边界点的情况
 					if (iter_heh == key_hehs[i + 1])
 					{
-						return INVALID_HANDLE;
+						return {};
 					}
 					link_two_hehs(prev_heh(iter_heh), next_heh(key_hehs[i]));
 					link_two_hehs(prev_heh(key_hehs[i + 1]), iter_heh);
@@ -165,7 +165,7 @@ namespace funu
 			auto const lastHeh{static_cast<HalfedgeHandle>(he_n() - 1)};
 			for (int i = 0; i < 3; ++i)
 			{
-				if (key_hehs[i] == INVALID_HANDLE)
+				if (!key_hehs[i].is_valid())
 				{
 					key_hehs[i] = new_edge(key_vhs[i], key_vhs[i + 1]);
 				}
@@ -202,11 +202,11 @@ namespace funu
 					//旧-->旧
 					if (outgoing_halfedge(joint_vh) == key_hehs[i + 1])
 					{
-						for (auto viter{VCirculator(this, joint_vh)}; viter.is_valid(); ++viter)
+						for (auto viter{VCirculator(*this, joint_vh)}; viter.is_valid(); ++viter)
 						{
-							if (is_boundary_hedge(viter.oheh()))
+							if (is_boundary_halfedge(viter.outgoing_heh()))
 							{
-								set_outgoing_heh(joint_vh, viter.oheh());
+								set_outgoing_heh(joint_vh, viter.outgoing_heh());
 								break;
 							}
 						}
@@ -252,7 +252,7 @@ namespace funu
 			}
 			return curr_fh;
 		}
-		return INVALID_HANDLE;
+		return {};
 	}
 
 	inline void TriMesh::remove_face(FaceHandle fh)
@@ -315,7 +315,7 @@ namespace funu
 		return opposite_heh(next_heh(heh));
 	}
 
-	inline bool TriMesh::is_boundary_hedge(HalfedgeHandle heh) const
+	inline bool TriMesh::is_boundary_halfedge(HalfedgeHandle heh) const
 	{
 		return !adhere_to_fh(heh).is_valid();
 	}
@@ -365,4 +365,105 @@ namespace funu
 		set_next_heh(heh0,heh1);
 		set_prev_heh(heh1,heh0);
 	}
+
+	VCirculator::VCirculator(TriMesh const& mesh, TriMesh::VertexHandle vh): mesh_{mesh},
+	                                                                         start_heh_{mesh_.outgoing_halfedge(vh)},
+	                                                                         curr_heh_{start_heh_},
+	                                                                         rotate_count_{}
+	{
+	}
+
+	inline VCirculator& VCirculator::operator++()
+	{
+		curr_heh_ = mesh_.ccw_outgoing_heh(curr_heh_);
+		++rotate_count_;
+		return *this;
+	}
+
+	inline VCirculator& VCirculator::operator--()
+	{
+		curr_heh_ = mesh_.cw_outgoing_heh(curr_heh_);
+		--rotate_count_;
+		return *this;
+	}
+
+	inline bool VCirculator::is_valid() const
+	{
+		return curr_heh_ != start_heh_ || !rotate_count_;
+	}
+
+	inline TriMesh::HalfedgeHandle VCirculator::outgoing_heh() const
+	{
+		return curr_heh_;
+	}
+
+	inline TriMesh::HalfedgeHandle VCirculator::incoming_heh() const
+	{
+		return mesh_.opposite_heh(curr_heh_);
+	}
+
+	inline TriMesh::VertexHandle VCirculator::vh() const
+	{
+		return mesh_.to_vh(curr_heh_);
+	}
+
+	FCirculator::FCirculator(TriMesh const& mesh, TriMesh::FaceHandle fh): mesh_{mesh},
+	                                                                       prev_inner_heh_{mesh_.inner_heh(fh)},
+	                                                                       next_inner_heh_{
+		                                                                       mesh_.next_heh(prev_inner_heh_)
+	                                                                       },
+	                                                                       start_heh_{
+		                                                                       find_target_oheh(prev_inner_heh_)
+	                                                                       },
+	                                                                       curr_heh_{start_heh_}, rotate_count_{}
+	{
+	}
+
+	inline FCirculator& FCirculator::operator++()
+	{
+		curr_heh_ = mesh_.ccw_outgoing_heh(curr_heh_);
+		if (curr_heh_ == next_inner_heh_)
+		{
+			prev_inner_heh_ = next_inner_heh_;
+			next_inner_heh_ = mesh_.next_heh(next_inner_heh_);
+			curr_heh_ = find_target_oheh(prev_inner_heh_);
+		}
+		++rotate_count_;
+		return *this;
+	}
+
+	inline FCirculator& FCirculator::operator--()
+	{
+		curr_heh_ = mesh_.cw_outgoing_heh(curr_heh_);
+		if (curr_heh_ == mesh_.opposite_heh(prev_inner_heh_))
+		{
+			next_inner_heh_ = prev_inner_heh_;
+			prev_inner_heh_ = mesh_.prev_heh(prev_inner_heh_);
+			curr_heh_ = mesh_.next_heh(curr_heh_);
+		}
+		--rotate_count_;
+		return *this;
+	}
+
+	inline bool FCirculator::is_valid() const
+	{
+		return curr_heh_ != start_heh_ || !rotate_count_;
+	}
+
+	inline TriMesh::HalfedgeHandle FCirculator::outgoing_heh() const
+	{
+		return curr_heh_;
+	}
+
+	inline TriMesh::HalfedgeHandle FCirculator::incoming_heh() const
+	{
+		return mesh_.opposite_heh(curr_heh_);
+	}
+
+	inline TriMesh::HalfedgeHandle FCirculator::find_target_oheh(TriMesh::HalfedgeHandle inner_heh) const
+	{
+		return mesh_.ccw_outgoing_heh(mesh_.opposite_heh(inner_heh));
+	}
+
+
 }
