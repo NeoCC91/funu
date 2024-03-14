@@ -26,7 +26,7 @@ namespace funu
 		{
 			[[nodiscard]] int idx() const { return idx_; }
 			[[nodiscard]] explicit operator int() const { return idx(); }
-			[[nodiscard]] bool is_valid() const { return idx_ != -1; }
+			[[nodiscard]] bool is_valid() const { return idx_ >= 0; }
 			[[nodiscard]] std::strong_ordering operator<=>(Handle const& rhs) const = default;
 
 		protected:
