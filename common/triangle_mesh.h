@@ -6,7 +6,7 @@
 
 namespace funu
 {
-	//Èı½ÇÍø¸ñ
+	//ä¸‰è§’ç½‘æ ¼
 	class TriMesh
 	{
 	public:
@@ -21,7 +21,7 @@ namespace funu
 		using Point = Eigen::Vector4f;
 		using Dir = Eigen::Vector4f;
 
-		//»ù´¡ÔªËØË÷Òı
+		//åŸºç¡€å…ƒç´ ç´¢å¼•
 		struct Handle
 		{
 			[[nodiscard]] int idx() const { return idx_; }
@@ -66,84 +66,84 @@ namespace funu
 			}
 		};
 
-		//ÍØÆËĞÅÏ¢ÀàĞÍ
-		//¶¥µãÍØÆË
+		//æ‹“æ‰‘ä¿¡æ¯ç±»å‹
+		//é¡¶ç‚¹æ‹“æ‰‘
 		struct VertexTopology
 		{
-			//¶¥µã³ö·¢µÄ°ë±ß(±ß½çµãÊ±£¬³ö±ßÎªÄ³¸ö±ß½ç°ë±ß)
+			//é¡¶ç‚¹å‡ºå‘çš„åŠè¾¹(è¾¹ç•Œç‚¹æ—¶ï¼Œå‡ºè¾¹ä¸ºæŸä¸ªè¾¹ç•ŒåŠè¾¹)
 			HalfedgeHandle outgoing_heh_;
 		};
 
-		//ÃæÆ¬ÍØÆË
+		//é¢ç‰‡æ‹“æ‰‘
 		struct FaceTopology
 		{
-			//ÃæÆ¬Ëùº¬Ä³¸ö°ë±ß
+			//é¢ç‰‡æ‰€å«æŸä¸ªåŠè¾¹
 			HalfedgeHandle inner_heh_;
 		};
 
-		//°ë±ßÍØÆË
+		//åŠè¾¹æ‹“æ‰‘
 		struct HalfEdgeTopology
 		{
-			//ÉÏÒ»¸ö°ë±ß
+			//ä¸Šä¸€ä¸ªåŠè¾¹
 			HalfedgeHandle prev_heh_;
-			//ÏÂÒ»¸ö°ë±ß
+			//ä¸‹ä¸€ä¸ªåŠè¾¹
 			HalfedgeHandle next_heh_;
-			//ËùÊôÃæÆ¬
+			//æ‰€å±é¢ç‰‡
 			FaceHandle adhere_to_fh_;
-			//Ö¸ÏòµÄ¶¥µã
+			//æŒ‡å‘çš„é¡¶ç‚¹
 			VertexHandle to_vh_;
 		};
 
-		//¶¥µã²Ù×÷
-		//¶¥µãÊıÁ¿
+		//é¡¶ç‚¹æ“ä½œ
+		//é¡¶ç‚¹æ•°é‡
 		size_t v_n() const;
 
-		//³ö°ë±ß
+		//å‡ºåŠè¾¹
 		HalfedgeHandle outgoing_halfedge(VertexHandle vh) const;
 
-		//»ñÈ¡vh0³ö·¢µ½vh1µÄ°ë±ß
+		//è·å–vh0å‡ºå‘åˆ°vh1çš„åŠè¾¹
 		HalfedgeHandle find_heh(VertexHandle vh0, VertexHandle vh1) const;
 
-		//»ñÈ¡×ø±êÊı¾İ
+		//è·å–åæ ‡æ•°æ®
 		Point& point(VertexHandle vh);
 		Point const& point(VertexHandle vh) const;
 
-		//¹ÂÁ¢µã
+		//å­¤ç«‹ç‚¹
 		bool is_isolated_vertex(VertexHandle vh) const;
-		//±ß½çµã(°üº¬¹ÂÁ¢µã)
+		//è¾¹ç•Œç‚¹(åŒ…å«å­¤ç«‹ç‚¹)
 		bool is_boundary_vertex(VertexHandle vh) const;
-		//·ÇÁ÷ĞÍµã
+		//éæµå‹ç‚¹
 		bool is_manifold(VertexHandle vh) const;
-		//¼Óµã
+		//åŠ ç‚¹
 		void add_vertex(Point const& pnt);
-		//É¾µã
+		//åˆ ç‚¹
 		void remove_vertex(VertexHandle vh);
 
-		//ÃæÆ¬²Ù×÷
-		//ÃæÊıÁ¿
+		//é¢ç‰‡æ“ä½œ
+		//é¢æ•°é‡
 		size_t f_n() const;
-		//°üº¬µÄ°ë±ß
+		//åŒ…å«çš„åŠè¾¹
 		HalfedgeHandle inner_heh(FaceHandle fh) const;
 
-		//Ìí¼ÓÃæÆ¬
+		//æ·»åŠ é¢ç‰‡
 		FaceHandle add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2);
-		//É¾³ıÃæÆ¬
+		//åˆ é™¤é¢ç‰‡
 		void remove_face(FaceHandle fh);
 
-		//°ë±ß²Ù×÷
-		//°ë±ßÊıÁ¿
+		//åŠè¾¹æ“ä½œ
+		//åŠè¾¹æ•°é‡
 		size_t he_n() const;
-		//±ßÊıÁ¿
+		//è¾¹æ•°é‡
 		size_t e_n() const;
-		//ÏÂÒ»Ìõ°ë±ß
+		//ä¸‹ä¸€æ¡åŠè¾¹
 		HalfedgeHandle next_heh(HalfedgeHandle heh) const;
-		//ÉÏÒ»Ìõ°ë±ß
+		//ä¸Šä¸€æ¡åŠè¾¹
 		HalfedgeHandle prev_heh(HalfedgeHandle heh) const;
-		//ËùÊôÃæÆ¬
+		//æ‰€å±é¢ç‰‡
 		FaceHandle adhere_to_fh(HalfedgeHandle heh) const;
-		//Ö¸Ïò¶¥µã
+		//æŒ‡å‘é¡¶ç‚¹
 		VertexHandle to_vh(HalfedgeHandle heh) const;
-		//·´Ïò°ë±ß
+		//åå‘åŠè¾¹
 		HalfedgeHandle opposite_heh(HalfedgeHandle heh) const;
 		//outgoing heh
 		HalfedgeHandle ccw_outgoing_heh(HalfedgeHandle heh) const;
@@ -151,18 +151,18 @@ namespace funu
 		//incoming heh
 		HalfedgeHandle ccw_incoming_heh(HalfedgeHandle heh) const;
 		HalfedgeHandle cw_incoming_heh(HalfedgeHandle heh) const;
-		//±ß½ç°ë±ß
+		//è¾¹ç•ŒåŠè¾¹
 		bool is_boundary_halfedge(HalfedgeHandle heh) const;
 
 	private:
-		//ÄÚ²¿²Ù×÷ºÍÊı¾İ
-		//µã
+		//å†…éƒ¨æ“ä½œå’Œæ•°æ®
+		//ç‚¹
 		void set_outgoing_heh(VertexHandle vh, HalfedgeHandle heh);
 
-		//Ãæ
+		//é¢
 		void set_inner_heh(FaceHandle fh, HalfedgeHandle heh);
 
-		//±ß
+		//è¾¹
 		HalfedgeHandle new_edge(VertexHandle vh0, VertexHandle vh1);
 		void set_to_vh(HalfedgeHandle heh, VertexHandle vh);
 		void set_adhere_to_fh(HalfedgeHandle heh, FaceHandle fh);
@@ -170,21 +170,21 @@ namespace funu
 		void set_prev_heh(HalfedgeHandle heh0, HalfedgeHandle heh1);
 		void link_two_hehs(HalfedgeHandle heh0, HalfedgeHandle heh1);
 
-		//ÍØÆË½á¹¹ĞÅÏ¢
+		//æ‹“æ‰‘ç»“æ„ä¿¡æ¯
 		std::vector<VertexTopology> verts_conn_;
 		std::vector<FaceTopology> faces_conn_;
 		std::vector<HalfEdgeTopology> halfedges_conn_;
 
-		//Î»ÖÃÊı¾İ x,y,z,w
+		//ä½ç½®æ•°æ® x,y,z,w
 		std::vector<Point> points_;
 
-		//É¾³ı±ê¼ÇÊı¾İ
+		//åˆ é™¤æ ‡è®°æ•°æ®
 		std::vector<int> verts_removed_;
 		std::vector<int> faces_removed_;
 		std::vector<int> halfedges_removed_;
 	};
 
-	//¶¥µãÍØÆË¹ØÏµ·ÃÎÊÆ÷
+	//é¡¶ç‚¹æ‹“æ‰‘å…³ç³»è®¿é—®å™¨
 	class VCirculator
 	{
 	public:
@@ -211,7 +211,7 @@ namespace funu
 		int rotate_count_;
 	};
 
-	//ÃæÆ¬ÍØÆË¹ØÏµ·ÃÎÊÆ÷
+	//é¢ç‰‡æ‹“æ‰‘å…³ç³»è®¿é—®å™¨
 	class FCirculator
 	{
 	public:

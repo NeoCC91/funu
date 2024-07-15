@@ -125,7 +125,7 @@ namespace funu
 
 	inline TriMesh::FaceHandle TriMesh::add_face(VertexHandle vh0, VertexHandle vh1, VertexHandle vh2)
 	{
-		//Îñ±Ø¶¼ÊÇ±ß½çµã
+		//åŠ¡å¿…éƒ½æ˜¯è¾¹ç•Œç‚¹
 		if (is_boundary_vertex(vh0) && is_boundary_vertex(vh1) && is_boundary_vertex(vh2))
 		{
 			std::array const key_vhs{vh0, vh1, vh2, vh0};
@@ -151,7 +151,7 @@ namespace funu
 					{
 						iter_heh = ccw_outgoing_heh(iter_heh);
 					}
-					//·ÇÁ÷ĞÍµãÖ»½ÓÊÜ±ß½çµãµÄÇé¿ö
+					//éæµå‹ç‚¹åªæ¥å—è¾¹ç•Œç‚¹çš„æƒ…å†µ
 					if (iter_heh == key_hehs[i + 1])
 					{
 						return {};
@@ -172,13 +172,13 @@ namespace funu
 			}
 			key_hehs[3] = key_hehs[0];
 
-			//¼ÓÈëÃæÆ¬
+			//åŠ å…¥é¢ç‰‡
 			faces_conn_.emplace_back();
 			faces_removed_.push_back(0);
 			FaceHandle const curr_fh{static_cast<FaceHandle>(f_n() - 1)};
 			set_inner_heh(curr_fh, key_hehs[0]);
 
-			//ÉèÖÃÍâÎ§°ë±ßµÄÍØÆËÊı¾İ
+			//è®¾ç½®å¤–å›´åŠè¾¹çš„æ‹“æ‰‘æ•°æ®
 			for (int i = 0; i < 3; ++i)
 			{
 				HalfedgeHandle const outer_prev{opposite_heh(key_hehs[i + 1])};
@@ -199,7 +199,7 @@ namespace funu
 				switch (case_id)
 				{
 				case 0:
-					//¾É-->¾É
+					//æ—§-->æ—§
 					if (outgoing_halfedge(joint_vh) == key_hehs[i + 1])
 					{
 						for (auto viter{VCirculator(*this, joint_vh)}; viter.is_valid(); ++viter)
@@ -213,26 +213,26 @@ namespace funu
 					}
 					break;
 				case 1:
-					// ĞÂ-->¾É
+					// æ–°-->æ—§
 					boundary_prev = prev_heh(key_hehs[i + 1]);
 					link_two_hehs(boundary_prev, outer_next);
 					set_outgoing_heh(joint_vh, outer_next);
 					break;
 				case 2:
-					// ¾É-->ĞÂ
+					// æ—§-->æ–°
 					boundary_next = next_heh(key_hehs[i]);
 					link_two_hehs(outer_prev, boundary_next);
 					set_outgoing_heh(joint_vh, boundary_next);
 					break;
 				case 3:
-					//ĞÂ-->ĞÂ
-					//¹ÂÁ¢µã
+					//æ–°-->æ–°
+					//å­¤ç«‹ç‚¹
 					if (is_isolated_vertex(joint_vh))
 					{
 						set_outgoing_heh(joint_vh, outer_next);
 						link_two_hehs(outer_prev, outer_next);
 					}
-					//·Ç¹ÂÁ¢µã
+					//éå­¤ç«‹ç‚¹
 					else
 					{
 						boundary_next = outgoing_halfedge(joint_vh);
