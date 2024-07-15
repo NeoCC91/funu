@@ -2,7 +2,7 @@
 
 #include <compare>
 #include <vector>
-#include <Eigen/Dense>
+#include "common_types.h"
 
 namespace funu
 {
@@ -17,9 +17,6 @@ namespace funu
 
 		TriMesh& operator=(TriMesh const& rhs);
 		TriMesh& operator=(TriMesh&& rhs) noexcept;
-
-		using Point = Eigen::Vector4f;
-		using Dir = Eigen::Vector4f;
 
 		//基础元素索引
 		struct Handle
@@ -105,8 +102,8 @@ namespace funu
 		HalfedgeHandle find_heh(VertexHandle vh0, VertexHandle vh1) const;
 
 		//获取坐标数据
-		Point& point(VertexHandle vh);
-		Point const& point(VertexHandle vh) const;
+		vec4f& point(VertexHandle vh);
+		vec4f const& point(VertexHandle vh) const;
 
 		//孤立点
 		bool is_isolated_vertex(VertexHandle vh) const;
@@ -115,7 +112,7 @@ namespace funu
 		//非流型点
 		bool is_manifold(VertexHandle vh) const;
 		//加点
-		void add_vertex(Point const& pnt);
+		void add_vertex(vec4f const& pnt);
 		//删点
 		void remove_vertex(VertexHandle vh);
 
@@ -176,7 +173,7 @@ namespace funu
 		std::vector<HalfEdgeTopology> halfedges_conn_;
 
 		//位置数据 x,y,z,w
-		std::vector<Point> points_;
+		std::vector<vec4f> points_;
 
 		//删除标记数据
 		std::vector<int> verts_removed_;

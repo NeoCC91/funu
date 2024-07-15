@@ -1,5 +1,5 @@
 #include <array>
-#include <common/triangle_mesh.h>
+#include "triangle_mesh.h"
 
 namespace funu
 {
@@ -68,12 +68,12 @@ namespace funu
 		return heh;
 	}
 
-	inline TriMesh::Point& TriMesh::point(VertexHandle vh)
+	inline vec4f& TriMesh::point(VertexHandle vh)
 	{
 		return points_[vh.idx()];
 	}
 
-	inline TriMesh::Point const& TriMesh::point(VertexHandle vh) const
+	inline vec4f const& TriMesh::point(VertexHandle vh) const
 	{
 		return points_[vh.idx()];
 	}
@@ -101,7 +101,7 @@ namespace funu
 		return outg_num < 2;
 	}
 
-	inline void TriMesh::add_vertex(Point const& pnt)
+	inline void TriMesh::add_vertex(vec4f const& pnt)
 	{
 		verts_conn_.emplace_back();
 		points_.push_back(pnt);
